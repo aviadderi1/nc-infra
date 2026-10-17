@@ -297,7 +297,7 @@ select.in option{background:#16241c}
 .db-legend .sw.late{background:rgba(231,76,60,.35)}
 .db-legend .sw.auto{background:transparent;border-inline-start:3px solid var(--accent2)}
 .db-wrap{overflow:auto;max-height:calc(100dvh - var(--tb) - 170px);border:1px solid var(--line);border-radius:12px}
-table.db{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px;font-size:14px}
+table.db{border-collapse:separate;border-spacing:0;width:100%;min-width:1480px;font-size:14px}
 table.db th{position:sticky;top:0;z-index:2;background:#1f3328;color:var(--accent2);font-weight:500;text-align:right;padding:10px 8px;
   border-bottom:1px solid rgba(232,198,90,.4);border-inline-start:1px solid rgba(255,255,255,.08);white-space:nowrap}
 table.db td{border-bottom:1px solid rgba(255,255,255,.08);border-inline-start:1px solid rgba(255,255,255,.06);padding:0;height:40px;vertical-align:middle}
@@ -324,6 +324,14 @@ input[type=date].cell{color-scheme:dark}
 .ph-btn:hover{color:var(--accent2);border-color:var(--accent2)}
 .ph-x{background:transparent;border:none;color:var(--muted);font-size:14px;width:22px;height:22px;border-radius:4px}
 .ph-x:hover{color:var(--danger)}
+.seg{display:inline-flex;border:1px solid rgba(255,255,255,.16);border-radius:999px;overflow:hidden;margin:0 8px;white-space:nowrap}
+.seg button{background:transparent;border:none;color:var(--muted);font-size:12.5px;padding:5px 11px;border-inline-start:1px solid rgba(255,255,255,.1)}
+.seg button:first-child{border-inline-start:none}
+.seg button:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.seg button[aria-pressed=true].t0{background:rgba(231,76,60,.24);color:#ff8a80}
+.seg button[aria-pressed=true].t1{background:rgba(240,138,36,.24);color:#f5b06a}
+.seg button[aria-pressed=true].t2{background:rgba(93,202,165,.24);color:#7fdcb8}
+.na{color:var(--muted);padding:0 12px}
 .db-empty{padding:28px;text-align:center;color:var(--muted)}
 .saving{position:fixed;bottom:18px;left:18px;z-index:30;font-size:12px;color:var(--muted);background:#16241c;border:1px solid var(--line);border-radius:999px;padding:4px 12px}
 
@@ -509,7 +517,7 @@ input[type=date].cell{color-scheme:dark}
     </div>
     <div class="db-wrap" id="dbWrap">
       <table class="db" id="dbTable">
-        <thead><tr><th class="rn">#</th><th>אוגדה</th><th>חטיבה</th><th>סוג תשתית</th><th>שם תשתית</th><th>תאריך ביקורת נדרש</th><th>תאריך דיווח ביקורת</th><th>סוג תקלה</th><th>פירוט</th><th>תמונה</th></tr></thead>
+        <thead><tr><th class="rn">#</th><th>אוגדה</th><th>חטיבה</th><th>סוג תשתית</th><th>שם תשתית</th><th>תאריך ביקורת נדרש</th><th>תאריך דיווח ביקורת</th><th>סוג תקלה</th><th>פירוט</th><th>סטטוס טיפול בתקלה</th><th>תאריך הטיפול</th><th>תמונה</th></tr></thead>
         <tbody id="dbBody"></tbody>
       </table>
     </div>
@@ -924,7 +932,7 @@ function startData(){
     assetsLoaded = true;
     renderDb();
     syncReportsToAssets();
-  }, err=>{ assetsLoaded=false; if(!$('#vDb').hidden) $('#dbBody').innerHTML=`<tr><td colspan="10" class="db-empty">לא ניתן לקרוא את מסד הנתונים. ${esc(authMsg(err))}. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase.</td></tr>`; }));
+  }, err=>{ assetsLoaded=false; if(!$('#vDb').hidden) $('#dbBody').innerHTML=`<tr><td colspan="12" class="db-empty">לא ניתן לקרוא את מסד הנתונים. ${esc(authMsg(err))}. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase.</td></tr>`; }));
   if(current.role==='super'){
     unsubs.push(FB.onSnapshot(FB.collection(FB.db,'users'), snap=>{
       USERS = snap.docs.map(d=>({ ...d.data(), uid:d.id }));
@@ -938,6 +946,9 @@ function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; REPO
 const DB_DIVS = ['אוגדה 91','אוגדה 210','אוגדה 146','אחר'];
 const DB_TYPES = ['מוצב','ציר','מכשול','מעבר','בסיס אש','תשתית רציפות תפקודית','מיגון','אחר'];
 const FAULTS = ['','קריטית','בינונית','נמוכה','ללא תקלה'];
+const TREAT = ['לא טופל','בטיפול','טופל'];
+const TREAT_FILL = {'לא טופל':'FFFDE2DF','בטיפול':'FFFCE3C6','טופל':'FFD5F1E4'};
+const treatOf = a => a.faultType==='ללא תקלה' ? '' : (a.treatStatus || (a.faultType ? 'לא טופל' : ''));
 const SEV_TO_FAULT = {3:'קריטית',2:'בינונית',1:'נמוכה'};
 const FAULT_CLS = {'קריטית':'sev-c','בינונית':'sev-m','נמוכה':'sev-l','ללא תקלה':'sev-ok'};
 const FAULT_FILL = {'קריטית':'FFF8D3CF','בינונית':'FFFCE3C6','נמוכה':'FFFDF3C4','ללא תקלה':'FFD5F1E4'};
@@ -952,17 +963,16 @@ async function syncReportsToAssets(){
   if(syncing || !reportsLoaded || !assetsLoaded || !current) return;
   syncing=true;
   try{
-    const byKey = {}; ASSETS.forEach(a=>{ byKey[normKey(a.type,a.name)] = a; });
-    const latest = {};
-    REPORTS.forEach(r=>{ const k=normKey(r.type,r.name); if(!latest[k] || (r.createdAt||'')>(latest[k].createdAt||'')) latest[k]=r; });
-    for(const k in latest){
-      const r = latest[k], a = byKey[k];
-      if(a && (a.lastReportAt||'') >= (r.createdAt||'')) continue;
-      const data = { division:r.division||'', brigade:r.brigade||'', type:r.type||'', name:(r.name||'').trim().replace(/\s+/g,' '),
-        reportDate:r.date||'', faultType:SEV_TO_FAULT[r.severity]||'', details:r.details||'', photo:r.photo||null,
-        lastReportId:r.id, lastReportAt:r.createdAt||'', fromReport:true, updatedAt:new Date().toISOString(), updatedBy:'דיווח מהשטח' };
-      if(a) await FB.updateDoc(FB.doc(FB.db,'assets',a.id), data);
-      else await FB.setDoc(FB.doc(FB.db,'assets',hashId(k)), { ...data, requiredDate:'', createdAt:r.createdAt||new Date().toISOString() }, { merge:true });
+    const have = new Set(); ASSETS.forEach(a=>{ if(a.reportId) have.add(a.reportId); if(a.lastReportId) have.add(a.lastReportId); });
+    for(const r of REPORTS){
+      if(have.has(r.id)) continue;                                   // each field report = its own row, created once
+      await FB.setDoc(FB.doc(FB.db,'assets','r_'+r.id), {
+        division:r.division||'', brigade:r.brigade||'', type:r.type||'', name:(r.name||'').trim().replace(/\s+/g,' '),
+        requiredDate:'', reportDate:r.date||'', faultType:SEV_TO_FAULT[r.severity]||'', details:r.details||'',
+        treatStatus:'לא טופל', treatDate:'', photo:r.photo||null,
+        reportId:r.id, fromReport:true, createdAt:r.createdAt||new Date().toISOString(),
+        updatedAt:new Date().toISOString(), updatedBy:'דיווח מהשטח' }, { merge:true });
+      have.add(r.id);
     }
   }catch(e){ console.warn('sync', e); }
   finally{ syncing=false; }
@@ -986,10 +996,12 @@ function renderDb(){
       <td><input class="cell" type="date" data-f="reportDate" value="${esc(a.reportDate||'')}"></td>
       <td><select class="cell ${FAULT_CLS[a.faultType]||''}" data-f="faultType">${opt(FAULTS,a.faultType)}</select></td>
       <td class="col-det"><input class="cell" data-f="details" value="${esc(a.details||'')}" title="${esc(a.details||'')}"></td>
+      <td>${a.faultType==='ללא תקלה' ? '<span class="na">—</span>' : `<div class="seg" role="group" aria-label="סטטוס טיפול">${TREAT.map((t,k)=>`<button class="t${k}" data-treat="${t}" aria-pressed="${treatOf(a)===t}">${t}</button>`).join('')}</div>`}</td>
+      <td>${a.faultType==='ללא תקלה' ? '' : `<input class="cell" type="date" data-f="treatDate" value="${esc(a.treatDate||'')}">`}</td>
       <td>${a.photo ? `<div class="ph-cell"><img src="${a.photo}" alt="תמונה" data-zoom><button class="ph-x" data-rmph aria-label="הסר תמונה">✕</button></div>`
                     : `<div class="ph-cell"><button class="ph-btn" data-addph><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg>הוסף</button></div>`}</td>
     </tr>`).join('')
-    : `<tr><td colspan="10" class="db-empty">${assetsLoaded?'אין עדיין שורות. לחץ "הוסף שורה" או חכה לדיווח מהשטח':'טוען…'}</td></tr>`;
+    : `<tr><td colspan="12" class="db-empty">${assetsLoaded?'אין עדיין שורות. לחץ "הוסף שורה" או חכה לדיווח מהשטח':'טוען…'}</td></tr>`;
 }
 $('#dbTable').addEventListener('focusout',()=>setTimeout(()=>{ if(dbPending && !$('#dbTable').contains(document.activeElement)) renderDb(); },0));
 async function saveCell(id, field, value){
@@ -1001,7 +1013,7 @@ $('#dbBody').addEventListener('change',e=>{
   const el=e.target.closest('.cell'); if(!el) return;
   const id=el.closest('tr').dataset.id, f=el.dataset.f;
   let v=el.value; if(typeof v==='string') v=v.trim().replace(/\s+/g,' ');
-  if(f==='faultType'){ el.className='cell '+(FAULT_CLS[v]||''); }
+  if(f==='faultType'){ el.className='cell '+(FAULT_CLS[v]||''); setTimeout(()=>{ el.blur(); renderDb(); },0); }
   if(f==='requiredDate'||f==='reportDate'){ const a=ASSETS.find(x=>x.id===id); if(a){ const t={...a,[f]:v}; el.closest('tr').classList.toggle('late',isLate(t)); } }
   saveCell(id,f,v);
 });
@@ -1014,6 +1026,17 @@ $('#dbBody').addEventListener('keydown',e=>{
 let dbPhotoRow=null;
 $('#dbBody').addEventListener('click',async e=>{
   const tr=e.target.closest('tr'); if(!tr?.dataset.id) return; const id=tr.dataset.id;
+  const tb=e.target.closest('[data-treat]');
+  if(tb){
+    const v=tb.dataset.treat, a=ASSETS.find(x=>x.id===id), ch={ treatStatus:v };
+    if(v==='טופל' && !a?.treatDate) ch.treatDate=todayISO();
+    if(v!=='טופל' && a?.treatDate) ch.treatDate='';
+    tr.querySelectorAll('[data-treat]').forEach(b=>b.setAttribute('aria-pressed', b===tb));
+    const di=tr.querySelector('[data-f=treatDate]'); if(di && 'treatDate' in ch) di.value=ch.treatDate;
+    try{ await FB.updateDoc(FB.doc(FB.db,'assets',id), { ...ch, updatedAt:new Date().toISOString(), updatedBy:current.name }); }
+    catch(err){ toast('השינוי לא נשמר. '+authMsg(err)); }
+    return;
+  }
   if(e.target.closest('[data-addph]')){ dbPhotoRow=id; $('#dbFile').value=''; $('#dbFile').click(); }
   else if(e.target.closest('[data-rmph]')){ saveCell(id,'photo',null); }
   else if(e.target.closest('[data-zoom]')){ $('#lightbox img').src=e.target.src; $('#lightbox').classList.add('show'); }
@@ -1036,7 +1059,7 @@ $('#dbFile').addEventListener('change',()=>{
 $('#dbAdd').addEventListener('click',async ()=>{
   const id='m_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   try{
-    await FB.setDoc(FB.doc(FB.db,'assets',id),{ division:'', brigade:'', type:'', name:'', requiredDate:'', reportDate:'', faultType:'', details:'', photo:null,
+    await FB.setDoc(FB.doc(FB.db,'assets',id),{ division:'', brigade:'', type:'', name:'', requiredDate:'', reportDate:'', faultType:'', details:'', treatStatus:'', treatDate:'', photo:null,
       fromReport:false, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:current.name });
     setTimeout(()=>{ const c=document.querySelector(`#dbBody tr[data-id="${id}"] .cell`); if(c){ c.focus(); $('#dbWrap').scrollTop=$('#dbWrap').scrollHeight; } },150);
   }catch(err){ toast('לא ניתן להוסיף שורה. '+authMsg(err)); }
@@ -1053,8 +1076,8 @@ $('#dbExport').addEventListener('click',async ()=>{
     const wb = new ExcelJS.Workbook(); wb.creator='אחזקת תשתיות מבצעיות פיקוד צפון'; wb.created=new Date();
     const ws = wb.addWorksheet('מסד נתונים', { views:[{ rightToLeft:true, state:'frozen', ySplit:3 }],
       pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, paperSize:9 } });
-    const heads=['#','אוגדה','חטיבה','סוג תשתית','שם תשתית','תאריך ביקורת נדרש','תאריך דיווח ביקורת','סוג תקלה','פירוט','תמונה'];
-    const widths=[5,13,14,18,24,17,17,12,46,16];
+    const heads=['#','אוגדה','חטיבה','סוג תשתית','שם תשתית','תאריך ביקורת נדרש','תאריך דיווח ביקורת','סוג תקלה','פירוט','סטטוס טיפול בתקלה','תאריך הטיפול','תמונה'];
+    const widths=[5,13,14,18,24,17,17,12,46,17,14,16];
     ws.columns = widths.map(w=>({ width:w }));
     ws.mergeCells(1,1,1,heads.length);
     const t=ws.getCell(1,1); t.value='מסד נתונים – אחזקת תשתיות מבצעיות פיקוד צפון';
@@ -1070,20 +1093,21 @@ $('#dbExport').addEventListener('click',async ()=>{
     const thin={ style:'thin', color:{argb:'FFD0D7D2'} };
     rows.forEach((a,i)=>{
       const r = ws.getRow(4+i);
-      r.values=[i+1, a.division||'', a.brigade||'', a.type||'', a.name||'', toDate(a.requiredDate), toDate(a.reportDate), a.faultType||'', a.details||'', ''];
+      r.values=[i+1, a.division||'', a.brigade||'', a.type||'', a.name||'', toDate(a.requiredDate), toDate(a.reportDate), a.faultType||'', a.details||'', treatOf(a), toDate(a.treatDate), ''];
       r.height = a.photo ? 62 : 22;
       r.eachCell({ includeEmpty:true },(c,col)=>{
         c.alignment={ horizontal: col===1?'center':'right', vertical:'middle', readingOrder:'rtl', wrapText: col===9 };
         c.border={ top:thin, bottom:thin, left:thin, right:thin };
-        if(col===6||col===7) c.numFmt='dd/mm/yyyy';
+        if(col===6||col===7||col===11) c.numFmt='dd/mm/yyyy';
         if(isLate(a)) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFFDE2DF'} };
         else if(i%2) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFF5F7F5'} };
       });
       const fc=r.getCell(8); if(FAULT_FILL[a.faultType]){ fc.fill={ type:'pattern', pattern:'solid', fgColor:{argb:FAULT_FILL[a.faultType]} }; fc.font={ bold:true }; }
+      const tc=r.getCell(10); if(TREAT_FILL[treatOf(a)]){ tc.fill={ type:'pattern', pattern:'solid', fgColor:{argb:TREAT_FILL[treatOf(a)]} }; tc.font={ bold:true }; tc.alignment={ horizontal:'center', vertical:'middle', readingOrder:'rtl' }; }
       if(a.photo && a.photo.startsWith('data:image/')){
         const ext = a.photo.startsWith('data:image/png') ? 'png' : 'jpeg';
         const imgId = wb.addImage({ base64:a.photo, extension:ext });
-        ws.addImage(imgId, { tl:{ col:9.08, row:3+i+0.06 }, ext:{ width:100, height:76 }, editAs:'oneCell' });
+        ws.addImage(imgId, { tl:{ col:11.08, row:3+i+0.06 }, ext:{ width:100, height:76 }, editAs:'oneCell' });
       }
     });
     ws.autoFilter = { from:{ row:3, column:1 }, to:{ row:3+Math.max(rows.length,1), column:heads.length } };
