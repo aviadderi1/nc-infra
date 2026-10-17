@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// אחזקת תשתיות מבצעיות פיקוד צפון – חוקי אבטחה ל-Firestore
+// להדבקה ב: Firebase Console ← Firestore Database ← Rules ← Publish
+//
+// מנהל ראשי: המספר האישי שמופיע ב-OWNER_EMAIL (חייב להיות זהה ל-OWNER_PN בקובץ index.html)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn()  { return request.auth != null; }
+    function profile()   { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isManager() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function isSuper()   { return isManager() && profile().role == 'super'; }
+    function isOwner()   { return signedIn() && request.auth.token.email == '1234567@nc-infra.app'; }
+
+    // ---- דיווחי תקלות ----
+    match /reports/{reportId} {
+      // מנהלים בלבד רואים דיווחים
+      allow read: if isManager();
+
+      // כל מדווח (כולל אנונימי) יכול רק ליצור דיווח חדש, בפורמט הנכון
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['role','division','brigade','type','name','date',
+                                                 'severity','details','photo','status','createdAt','serverTime'])
+        && request.resource.data.status == 'open'
+        && request.resource.data.severity in [1, 2, 3]
+        && request.resource.data.name is string    && request.resource.data.name.size() > 0    && request.resource.data.name.size() < 200
+        && request.resource.data.details is string && request.resource.data.details.size() > 0 && request.resource.data.details.size() < 3000
+        && request.resource.data.type is string     && request.resource.data.division is string
+        && request.resource.data.brigade is string  && request.resource.data.brigade.size() < 100
+        && request.resource.data.createdAt is string
+        && (request.resource.data.photo == null
+            || (request.resource.data.photo is string && request.resource.data.photo.size() < 900000));
+
+      // רק המנהל הראשי עורך, משנה סטטוס ומוחק
+      allow update, delete: if isSuper();
+    }
+
+    // ---- משתמשי הדשבורד ----
+    match /users/{uid} {
+      allow read: if isSuper() || (signedIn() && request.auth.uid == uid);
+
+      // המנהל הראשי מוסיף משתמשים; ההגדרה הראשונית מותרת רק למספר האישי של המנהל הראשי
+      allow create: if isSuper()
+        || (isOwner() && request.auth.uid == uid && request.resource.data.role == 'super');
+
+      allow update, delete: if isSuper();
+    }
+  }
+}
