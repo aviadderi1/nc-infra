@@ -352,6 +352,17 @@ input[type=date].cell{color-scheme:dark}
 .db-empty{padding:28px;text-align:center;color:var(--muted)}
 .saving{position:fixed;bottom:18px;left:18px;z-index:30;font-size:12px;color:var(--muted);background:#16241c;border:1px solid var(--line);border-radius:999px;padding:4px 12px}
 
+/* ---------- Readiness table ---------- */
+table.db.rd{min-width:1080px}
+.rd-sel{font-weight:500;border-radius:999px;margin:0 6px;width:auto;min-width:150px;height:30px;padding:0 12px;border:1px solid}
+.rd-sel.k0{color:#7fdcb8;border-color:rgba(127,220,184,.5);background:rgba(93,202,165,.12)}
+.rd-sel.k1{color:#f5b06a;border-color:rgba(245,176,106,.5);background:rgba(240,138,36,.12)}
+.rd-sel.k2{color:#ff8a80;border-color:rgba(255,138,128,.5);background:rgba(231,76,60,.14)}
+.rd-cell{display:flex;align-items:center;gap:4px}
+.man-tag{font-size:10.5px;font-weight:500;color:var(--accent2);border:1px solid rgba(232,198,90,.5);border-radius:5px;padding:0 5px}
+.rd-summary{display:inline-flex;gap:6px;flex-wrap:wrap;align-self:center}
+.rd-summary span{font-size:12px;border-radius:999px;padding:2px 10px;border:1px solid}
+
 /* ---------- Toast / dialog ---------- */
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:#1f3328;border:1px solid rgba(232,198,90,.4);
   color:var(--text);padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:100}
@@ -452,9 +463,13 @@ input[type=date].cell{color-scheme:dark}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         <span class="n" id="bellCount" hidden>0</span>
       </button>
-      <button class="btn-ghost" id="btnDb" title="Create database">
+      <button class="btn-ghost" id="btnDb" title="מסד נתוני תקלות">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 9v11M15 9v11"/></svg>
-        <span class="lbl">Create database</span>
+        <span class="lbl">מסד נתוני תקלות</span>
+      </button>
+      <button class="btn-ghost" id="btnReady" title="מסד נתוני כשירויות">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+        <span class="lbl">מסד נתוני כשירויות</span>
       </button>
       <button class="btn-ghost" id="btnUsers" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M19 8v6M16 11h6"/></svg>
@@ -522,7 +537,7 @@ input[type=date].cell{color-scheme:dark}
   <!-- Database -->
   <main class="content view db-view" id="vDb" hidden>
     <div class="page-head db-head">
-      <div class="db-titles"><h2>מסד נתונים</h2><span class="db-count" id="dbCount"></span>
+      <div class="db-titles"><h2>מסד נתוני תקלות</h2><span class="db-count" id="dbCount"></span>
         <span class="db-chip" id="dbChip" hidden>מציג: תקלות קריטיות פתוחות <button id="dbChipX" aria-label="הצג את כל הטבלה">✕</button></span></div>
       <div class="db-actions">
         <button class="btn-ghost" id="dbAdd">
@@ -545,6 +560,33 @@ input[type=date].cell{color-scheme:dark}
       </table>
     </div>
     <input type="file" id="dbFile" accept="image/*" hidden>
+  </main>
+
+  <!-- Readiness database -->
+  <main class="content view db-view" id="vReady" hidden>
+    <div class="page-head db-head">
+      <div class="db-titles"><h2>מסד נתוני כשירויות</h2><span class="db-count" id="rdCount"></span><span class="rd-summary" id="rdSummary"></span></div>
+      <div class="db-actions">
+        <button class="btn-ghost" id="rdAdd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>הוסף תשתית</button>
+        <button class="btn-xl" id="rdExport" aria-label="ייצוא לאקסל" title="ייצוא לאקסל">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="13" height="18" rx="2" fill="#fff"/><path d="M5 8l5 8M10 8l-5 8" stroke="#1d6f42" stroke-width="2.2" stroke-linecap="round"/><rect x="14" y="5" width="8" height="14" rx="1.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M14 9.5h8M14 14h8M18 5v14" stroke="#fff" stroke-width="1.2"/></svg>
+          <span>ייצוא לאקסל</span></button>
+        <button class="btn-ghost" data-back>חזרה ←</button>
+      </div>
+    </div>
+    <div class="db-legend">
+      <span>הכשירות מחושבת מהתקלות הפתוחות: קריטית ← לא כשיר · בינונית/נמוכה ← כשירות חלקית · אין ← כשיר</span>
+      <span><b class="man-tag">ידני</b> נקבע ידנית, עד שמגיעה תקלה חדשה על התשתית</span>
+      <span><i class="sw late"></i>עבר תאריך הביקורת הנדרש ואין דיווח</span>
+    </div>
+    <div class="db-wrap">
+      <table class="db rd" id="rdTable">
+        <thead><tr><th class="rn">#</th><th>אוגדה</th><th>חטיבה</th><th>סוג תשתית</th><th>שם תשתית</th><th>סטטוס כשירות</th><th>תאריך ביקורת נדרש</th><th>תאריך דיווח ביקורת</th><th>תמונה</th></tr></thead>
+        <tbody id="rdBody"></tbody>
+      </table>
+    </div>
+    <input type="file" id="rdFile" accept="image/*" hidden>
   </main>
 
   <!-- Users -->
@@ -640,7 +682,7 @@ const pnEmail = pn => `${pn}@${EMAIL_DOMAIN}`;
 let FB = null;
 const fbReady = new Promise((res,rej)=>{ window.__fbResolve=res; setTimeout(()=>rej(new Error('timeout')),15000); });
 fbReady.then(fb=>{ FB=fb; setSrv('ok','מחובר לשרת'); }).catch(()=>setSrv('bad','אין חיבור לשרת. בדוק את החיבור לאינטרנט'));
-let REPORTS = [], USERS = [], ASSETS = [], unsubs = [], reportsLoaded = false, assetsLoaded = false, SEEN = new Set();
+let REPORTS = [], USERS = [], ASSETS = [], READY = [], unsubs = [], reportsLoaded = false, assetsLoaded = false, readyLoaded = false, SEEN = new Set();
 const store = {
   get(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } },
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -754,7 +796,7 @@ document.querySelectorAll('.lb-tab').forEach(t=>t.addEventListener('click',()=>{
 
 /* ================= Views ================= */
 function showView(id){
-  ['vDash','vDetail','vUsers','vDb'].forEach(v=>$('#'+v).hidden = v!==id);
+  ['vDash','vDetail','vUsers','vDb','vReady'].forEach(v=>$('#'+v).hidden = v!==id);
   document.getElementById('newAlert').classList.toggle('off', id!=='vDash');
   window.scrollTo(0,0);
 }
@@ -954,9 +996,14 @@ function startData(){
   unsubs.push(FB.onSnapshot(FB.collection(FB.db,'assets'), snap=>{
     ASSETS = snap.docs.map(d=>({ ...d.data(), id:d.id }));
     assetsLoaded = true;
-    renderDb(); renderCrit();
-    syncReportsToAssets();
+    renderDb(); renderCrit(); renderReady();
+    syncReportsToAssets(); syncReadiness();
   }, err=>{ assetsLoaded=false; if(!$('#vDb').hidden) $('#dbBody').innerHTML=`<tr><td colspan="12" class="db-empty">לא ניתן לקרוא את מסד הנתונים. ${esc(authMsg(err))}. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase.</td></tr>`; }));
+  unsubs.push(FB.onSnapshot(FB.collection(FB.db,'readiness'), snap=>{
+    READY = snap.docs.map(d=>({ ...d.data(), id:d.id }));
+    readyLoaded = true;
+    renderReady(); syncReadiness();
+  }, err=>{ readyLoaded=false; if(!$('#vReady').hidden) $('#rdBody').innerHTML=`<tr><td colspan="9" class="db-empty">לא ניתן לקרוא את מסד נתוני הכשירויות. ${esc(authMsg(err))}. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase.</td></tr>`; }));
   if(current.role==='super'){
     unsubs.push(FB.onSnapshot(FB.collection(FB.db,'users'), snap=>{
       USERS = snap.docs.map(d=>({ ...d.data(), uid:d.id }));
@@ -964,7 +1011,7 @@ function startData(){
     }, err=>toast('לא ניתן לקרוא משתמשים. '+authMsg(err))));
   }
 }
-function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; REPORTS=[]; USERS=[]; ASSETS=[]; reportsLoaded=false; assetsLoaded=false; }
+function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; REPORTS=[]; USERS=[]; ASSETS=[]; READY=[]; reportsLoaded=false; assetsLoaded=false; readyLoaded=false; }
 
 /* ================= Database (assets table) ================= */
 const DB_DIVS = ['אוגדה 91','אוגדה 210','אוגדה 146','אחר'];
@@ -1106,57 +1153,193 @@ $('#btnDb').addEventListener('click',()=>{ dbFilter=null; showView('vDb'); rende
 
 /* ---- Excel export (ExcelJS, loaded on first use) ---- */
 function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load')); document.head.appendChild(s); }); }
-$('#dbExport').addEventListener('click',async ()=>{
-  const btn=$('#dbExport'); btn.disabled=true; const lbl=btn.querySelector('span'); const old=lbl.textContent; lbl.textContent='מכין קובץ…';
+/* spec: {title, sheet, fileBase, heads, widths, dateCols:[col#], centerCols:[col#], wrapCols:[col#], photoCol, note,
+          rows:[{cells:[], late:bool, fills:{col:argb}, photo}]} – columns are 1-based */
+async function exportSheet(spec, btn){
+  btn.disabled=true; const lbl=btn.querySelector('span'), old=lbl.textContent; lbl.textContent='מכין קובץ…';
   try{
     if(!window.ExcelJS) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
-    const rows = dbRows();
-    const wb = new ExcelJS.Workbook(); wb.creator='אחזקת תשתיות מבצעיות פיקוד צפון'; wb.created=new Date();
-    const ws = wb.addWorksheet('מסד נתונים', { views:[{ rightToLeft:true, state:'frozen', ySplit:3 }],
+    const wb=new ExcelJS.Workbook(); wb.creator='אחזקת תשתיות מבצעיות פיקוד צפון'; wb.created=new Date();
+    const n=spec.heads.length;
+    const ws=wb.addWorksheet(spec.sheet,{ views:[{ rightToLeft:true, state:'frozen', ySplit:3 }],
       pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, paperSize:9 } });
-    const heads=['#','אוגדה','חטיבה','סוג תשתית','שם תשתית','תאריך ביקורת נדרש','תאריך דיווח ביקורת','סוג תקלה','פירוט','סטטוס טיפול בתקלה','תאריך הטיפול','תמונה'];
-    const widths=[5,13,14,18,24,17,17,12,46,17,14,16];
-    ws.columns = widths.map(w=>({ width:w }));
-    ws.mergeCells(1,1,1,heads.length);
-    const t=ws.getCell(1,1); t.value='מסד נתונים – אחזקת תשתיות מבצעיות פיקוד צפון';
+    ws.columns=spec.widths.map(w=>({ width:w }));
+    ws.mergeCells(1,1,1,n); const t=ws.getCell(1,1); t.value=spec.title;
     t.font={ bold:true, size:16, color:{argb:'FF1F3328'} }; t.alignment={ horizontal:'right', vertical:'middle', readingOrder:'rtl' }; ws.getRow(1).height=28;
-    ws.mergeCells(2,1,2,heads.length);
-    const sub=ws.getCell(2,1); sub.value=`הופק ב-${new Date().toLocaleString('he-IL')} · ${rows.length} שורות${dbFilter==='critOpen'?' · תקלות קריטיות פתוחות בלבד':''} · הופק ע״י ${current.name}`;
+    ws.mergeCells(2,1,2,n); const sub=ws.getCell(2,1);
+    sub.value=`הופק ב-${new Date().toLocaleString('he-IL')} · ${spec.rows.length} שורות${spec.note?' · '+spec.note:''} · הופק ע״י ${current.name}`;
     sub.font={ size:10, color:{argb:'FF6F7D72'} }; sub.alignment={ horizontal:'right', readingOrder:'rtl' };
-    const hr=ws.getRow(3); hr.values=heads; hr.height=24;
+    const hr=ws.getRow(3); hr.values=spec.heads; hr.height=24;
     hr.eachCell(c=>{ c.font={ bold:true, color:{argb:'FFFFFFFF'} }; c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FF1F3328'} };
-      c.alignment={ horizontal:'center', vertical:'middle', readingOrder:'rtl', wrapText:true };
-      c.border={ bottom:{ style:'medium', color:{argb:'FFC9A227'} } }; });
-    const toDate = s => { if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); };
+      c.alignment={ horizontal:'center', vertical:'middle', readingOrder:'rtl', wrapText:true }; c.border={ bottom:{ style:'medium', color:{argb:'FFC9A227'} } }; });
+    const toDate=s=>{ if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); };
     const thin={ style:'thin', color:{argb:'FFD0D7D2'} };
-    rows.forEach((a,i)=>{
-      const r = ws.getRow(4+i);
-      r.values=[i+1, a.division||'', a.brigade||'', a.type||'', a.name||'', toDate(a.requiredDate), toDate(a.reportDate), a.faultType||'', a.details||'', treatOf(a), toDate(a.treatDate), ''];
-      r.height = a.photo ? 62 : 22;
+    spec.rows.forEach((row,i)=>{
+      const r=ws.getRow(4+i);
+      r.values=row.cells.map((v,ci)=> spec.dateCols.includes(ci+1) ? toDate(v) : v);
+      r.height=row.photo?62:22;
       r.eachCell({ includeEmpty:true },(c,col)=>{
-        c.alignment={ horizontal: col===1?'center':'right', vertical:'middle', readingOrder:'rtl', wrapText: col===9 };
+        c.alignment={ horizontal: spec.centerCols.includes(col)?'center':'right', vertical:'middle', readingOrder:'rtl', wrapText: spec.wrapCols.includes(col) };
         c.border={ top:thin, bottom:thin, left:thin, right:thin };
-        if(col===6||col===7||col===11) c.numFmt='dd/mm/yyyy';
-        if(isLate(a)) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFFDE2DF'} };
+        if(spec.dateCols.includes(col)) c.numFmt='dd/mm/yyyy';
+        if(row.late) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFFDE2DF'} };
         else if(i%2) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFF5F7F5'} };
       });
-      const fc=r.getCell(8); if(FAULT_FILL[a.faultType]){ fc.fill={ type:'pattern', pattern:'solid', fgColor:{argb:FAULT_FILL[a.faultType]} }; fc.font={ bold:true }; }
-      const tc=r.getCell(10); if(TREAT_FILL[treatOf(a)]){ tc.fill={ type:'pattern', pattern:'solid', fgColor:{argb:TREAT_FILL[treatOf(a)]} }; tc.font={ bold:true }; tc.alignment={ horizontal:'center', vertical:'middle', readingOrder:'rtl' }; }
-      if(a.photo && a.photo.startsWith('data:image/')){
-        const ext = a.photo.startsWith('data:image/png') ? 'png' : 'jpeg';
-        const imgId = wb.addImage({ base64:a.photo, extension:ext });
-        ws.addImage(imgId, { tl:{ col:11.08, row:3+i+0.06 }, ext:{ width:100, height:76 }, editAs:'oneCell' });
+      for(const col in (row.fills||{})){ const c=r.getCell(+col); c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:row.fills[col]} }; c.font={ bold:true }; c.alignment={ horizontal:'center', vertical:'middle', readingOrder:'rtl' }; }
+      if(row.photo && row.photo.startsWith('data:image/')){
+        const id=wb.addImage({ base64:row.photo, extension: row.photo.startsWith('data:image/png')?'png':'jpeg' });
+        ws.addImage(id,{ tl:{ col:spec.photoCol-1+0.08, row:3+i+0.06 }, ext:{ width:100, height:76 }, editAs:'oneCell' });
       }
     });
-    ws.autoFilter = { from:{ row:3, column:1 }, to:{ row:3+Math.max(rows.length,1), column:heads.length } };
-    const buf = await wb.xlsx.writeBuffer();
-    const blob = new Blob([buf],{ type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const d=new Date(), name=`מסד-נתונים-פיקוד-צפון-${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}.xlsx`;
+    ws.autoFilter={ from:{ row:3, column:1 }, to:{ row:3+Math.max(spec.rows.length,1), column:n } };
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{ type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const d=new Date(), name=`${spec.fileBase}-${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}.xlsx`;
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
     toast('הקובץ ירד: '+name);
   }catch(err){ console.error(err); toast(err?.message==='load' ? 'לא ניתן לטעון את רכיב האקסל. בדוק את החיבור לאינטרנט' : 'הייצוא נכשל'); }
   finally{ btn.disabled=false; lbl.textContent=old; }
+}
+$('#dbExport').addEventListener('click',()=>{
+  const rows=dbRows();
+  exportSheet({ title:'מסד נתוני תקלות – אחזקת תשתיות מבצעיות פיקוד צפון', sheet:'מסד נתוני תקלות', fileBase:'מסד-נתוני-תקלות-פיקוד-צפון',
+    heads:['#','אוגדה','חטיבה','סוג תשתית','שם תשתית','תאריך ביקורת נדרש','תאריך דיווח ביקורת','סוג תקלה','פירוט','סטטוס טיפול בתקלה','תאריך הטיפול','תמונה'],
+    widths:[5,13,14,18,24,17,17,12,46,17,14,16], dateCols:[6,7,11], centerCols:[1], wrapCols:[9], photoCol:12,
+    note: dbFilter==='critOpen' ? 'תקלות קריטיות פתוחות בלבד' : '',
+    rows: rows.map((a,i)=>({ cells:[i+1,a.division||'',a.brigade||'',a.type||'',a.name||'',a.requiredDate,a.reportDate,a.faultType||'',a.details||'',treatOf(a),a.treatDate,''],
+      late:isLate(a), photo:a.photo,
+      fills:{ ...(FAULT_FILL[a.faultType]?{8:FAULT_FILL[a.faultType]}:{}), ...(TREAT_FILL[treatOf(a)]?{10:TREAT_FILL[treatOf(a)]}:{}) } }))
+  }, $('#dbExport'));
+});
+
+/* ================= Readiness database ================= */
+const READY_LEVELS = ['כשיר','כשירות חלקית','לא כשיר'];
+const READY_FILL = {'כשיר':'FFD5F1E4','כשירות חלקית':'FFFCE3C6','לא כשיר':'FFF8D3CF'};
+function faultsByKey(){
+  const m={}; ASSETS.forEach(a=>{ if(!a.type||!a.name) return; const k=normKey(a.type,a.name); (m[k]=m[k]||[]).push(a); }); return m;
+}
+function readyOf(r, fk){
+  const list=(fk||faultsByKey())[normKey(r.type,r.name)]||[];
+  const newest=list.reduce((mx,a)=>(a.createdAt||'')>mx?(a.createdAt||''):mx,'');
+  if(r.manualStatus && (r.manualAt||'')>newest) return { v:r.manualStatus, manual:true };
+  const open=list.filter(a=>['קריטית','בינונית','נמוכה'].includes(a.faultType) && treatOf(a)!=='טופל');
+  const v = open.some(a=>a.faultType==='קריטית') ? 'לא כשיר' : open.length ? 'כשירות חלקית' : 'כשיר';
+  return { v, manual:false };
+}
+/* every infrastructure in the faults table gets one readiness row; newest report date + photo flow in */
+let readySyncing=false;
+async function syncReadiness(){
+  if(readySyncing || !assetsLoaded || !readyLoaded || !current) return;
+  readySyncing=true;
+  try{
+    const fk=faultsByKey(), byKey={}; READY.forEach(r=>{ byKey[normKey(r.type,r.name)]=r; });
+    for(const k in fk){
+      const latest=fk[k].reduce((b,a)=>(a.createdAt||'')>(b.createdAt||'')?a:b);
+      const row=byKey[k];
+      if(!row){
+        await FB.setDoc(FB.doc(FB.db,'readiness','k'+hashId(k)),{ division:latest.division||'', brigade:latest.brigade||'', type:latest.type, name:latest.name,
+          requiredDate:'', reportDate:latest.reportDate||'', photo:latest.photo||null, manualStatus:null, manualAt:null,
+          syncedFaultAt:latest.createdAt||'', createdAt:latest.createdAt||new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:'מסד נתוני תקלות' },{ merge:true });
+      } else if((latest.createdAt||'')>(row.syncedFaultAt||'')){
+        const ch={ syncedFaultAt:latest.createdAt||'', updatedAt:new Date().toISOString(), updatedBy:'מסד נתוני תקלות' };
+        if(latest.reportDate) ch.reportDate=latest.reportDate;
+        if(latest.photo) ch.photo=latest.photo;
+        await FB.updateDoc(FB.doc(FB.db,'readiness',row.id), ch);
+      }
+    }
+  }catch(e){ console.warn('readiness sync', e); }
+  finally{ readySyncing=false; }
+}
+let rdPending=false;
+function renderReady(){
+  if($('#vReady').hidden) return;
+  if($('#rdTable').contains(document.activeElement) && document.activeElement.matches('.cell')){ rdPending=true; return; }
+  rdPending=false;
+  const fk=faultsByKey(), rows=READY.slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  const cnt={}; rows.forEach(r=>{ const v=readyOf(r,fk).v; cnt[v]=(cnt[v]||0)+1; });
+  $('#rdCount').textContent=`${rows.length} תשתיות`;
+  $('#rdSummary').innerHTML=READY_LEVELS.map((l,k)=>cnt[l]?`<span class="rd-sel k${k}" style="min-width:0;height:auto;padding:2px 10px">${l}: ${cnt[l]}</span>`:'').join('');
+  const opt=(arr,v)=>arr.map(x=>`<option value="${esc(x)}" ${x===(v||'')?'selected':''}>${esc(x||'—')}</option>`).join('');
+  $('#rdBody').innerHTML = rows.length ? rows.map((r,i)=>{
+    const st=readyOf(r,fk), lvl=READY_LEVELS.indexOf(st.v), auto=readyOf({...r,manualStatus:null},fk).v;
+    return `<tr data-id="${esc(r.id)}" class="${isLate(r)?'late':''}">
+      <td class="rn"><span class="num">${i+1}</span><button class="del" data-del aria-label="מחק שורה ${i+1}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg></button></td>
+      <td class="col-div"><select class="cell" data-f="division">${opt(['',...DB_DIVS],r.division)}</select></td>
+      <td class="col-bri"><input class="cell" data-f="brigade" value="${esc(r.brigade||'')}"></td>
+      <td><select class="cell" data-f="type">${opt(['',...DB_TYPES],r.type)}</select></td>
+      <td class="col-name"><input class="cell" data-f="name" value="${esc(r.name||'')}"></td>
+      <td><div class="rd-cell"><select class="cell rd-sel k${lvl}" data-f="readyStatus" aria-label="סטטוס כשירות">
+          <option value="__auto" ${st.manual?'':'selected'}>${esc(auto)} · אוטומטי</option>
+          ${READY_LEVELS.map(l=>`<option value="${l}" ${st.manual&&st.v===l?'selected':''}>${l} · ידני</option>`).join('')}
+        </select>${st.manual?'<b class="man-tag">ידני</b>':''}</div></td>
+      <td><input class="cell" type="date" data-f="requiredDate" value="${esc(r.requiredDate||'')}"></td>
+      <td><input class="cell" type="date" data-f="reportDate" value="${esc(r.reportDate||'')}"></td>
+      <td>${r.photo ? `<div class="ph-cell"><img src="${r.photo}" alt="תמונה" data-zoom><button class="ph-x" data-rmph aria-label="הסר תמונה">✕</button></div>`
+                    : `<div class="ph-cell"><button class="ph-btn" data-addph><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg>הוסף</button></div>`}</td>
+    </tr>`; }).join('')
+    : `<tr><td colspan="9" class="db-empty">${readyLoaded?'אין עדיין תשתיות. הן נוספות אוטומטית מטבלת התקלות, או בלחיצה על "הוסף תשתית"':'טוען…'}</td></tr>`;
+}
+$('#rdTable').addEventListener('focusout',()=>setTimeout(()=>{ if(rdPending && !$('#rdTable').contains(document.activeElement)) renderReady(); },0));
+async function saveReady(id, ch){
+  try{ await FB.updateDoc(FB.doc(FB.db,'readiness',id), { ...ch, updatedAt:new Date().toISOString(), updatedBy:current.name }); }
+  catch(e){ toast('השינוי לא נשמר. '+authMsg(e)); }
+}
+$('#rdBody').addEventListener('change',e=>{
+  const el=e.target.closest('.cell'); if(!el) return;
+  const id=el.closest('tr').dataset.id, f=el.dataset.f; let v=el.value; if(typeof v==='string') v=v.trim().replace(/\s+/g,' ');
+  if(f==='readyStatus'){
+    el.blur();
+    saveReady(id, v==='__auto' ? { manualStatus:null, manualAt:null } : { manualStatus:v, manualAt:new Date().toISOString() });
+    return;
+  }
+  saveReady(id,{ [f]:v });
+});
+$('#rdBody').addEventListener('keydown',e=>{
+  if(e.key==='Enter' && e.target.matches('input.cell')){
+    e.preventDefault(); const td=e.target.closest('td'), tr=td.closest('tr'), idx=[...tr.children].indexOf(td);
+    const next=tr.nextElementSibling?.children[idx]?.querySelector('.cell'); e.target.blur(); next&&next.focus();
+  }
+});
+let rdPhotoRow=null;
+$('#rdBody').addEventListener('click',async e=>{
+  const tr=e.target.closest('tr'); if(!tr?.dataset.id) return; const id=tr.dataset.id;
+  if(e.target.closest('[data-addph]')){ rdPhotoRow=id; $('#rdFile').value=''; $('#rdFile').click(); }
+  else if(e.target.closest('[data-rmph]')){ saveReady(id,{ photo:null }); }
+  else if(e.target.closest('[data-zoom]')){ $('#lightbox img').src=e.target.src; $('#lightbox').classList.add('show'); }
+  else if(e.target.closest('[data-del]')){
+    const r=READY.find(x=>x.id===id);
+    if(await confirmDlg(`למחוק את ${r?.name||'השורה'} ממסד נתוני הכשירויות?`)){
+      try{ await FB.deleteDoc(FB.doc(FB.db,'readiness',id)); toast('השורה נמחקה'); }catch(err){ toast('המחיקה נכשלה. '+authMsg(err)); }
+    }
+  }
+});
+$('#rdFile').addEventListener('change',()=>{
+  const f=$('#rdFile').files[0]; if(!f||!rdPhotoRow) return;
+  const img=new Image(), url=URL.createObjectURL(f);
+  img.onload=()=>{ const k=Math.min(1,1000/Math.max(img.width,img.height)), c=document.createElement('canvas');
+    c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url); saveReady(rdPhotoRow,{ photo:c.toDataURL('image/jpeg',.7) }); };
+  img.onerror=()=>{ URL.revokeObjectURL(url); toast('לא ניתן לקרוא את התמונה'); };
+  img.src=url;
+});
+$('#rdAdd').addEventListener('click',async ()=>{
+  const id='m_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{
+    await FB.setDoc(FB.doc(FB.db,'readiness',id),{ division:'', brigade:'', type:'', name:'', requiredDate:'', reportDate:'', photo:null,
+      manualStatus:null, manualAt:null, syncedFaultAt:'', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:current.name });
+    setTimeout(()=>{ const c=document.querySelector(`#rdBody tr[data-id="${id}"] .cell`); if(c){ c.focus(); c.closest('.db-wrap').scrollTop=1e6; } },150);
+  }catch(err){ toast('לא ניתן להוסיף שורה. '+authMsg(err)); }
+});
+$('#btnReady').addEventListener('click',()=>{ showView('vReady'); renderReady(); });
+$('#rdExport').addEventListener('click',()=>{
+  const fk=faultsByKey(), rows=READY.slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  exportSheet({ title:'מסד נתוני כשירויות – אחזקת תשתיות מבצעיות פיקוד צפון', sheet:'מסד נתוני כשירויות', fileBase:'מסד-נתוני-כשירויות-פיקוד-צפון',
+    heads:['#','אוגדה','חטיבה','סוג תשתית','שם תשתית','סטטוס כשירות','תאריך ביקורת נדרש','תאריך דיווח ביקורת','תמונה'],
+    widths:[5,13,14,18,26,18,17,17,16], dateCols:[7,8], centerCols:[1], wrapCols:[], photoCol:9,
+    rows: rows.map((r,i)=>{ const st=readyOf(r,fk); return { cells:[i+1,r.division||'',r.brigade||'',r.type||'',r.name||'',st.v+(st.manual?' (ידני)':''),r.requiredDate,r.reportDate,''],
+      late:isLate(r), photo:r.photo, fills:{6:READY_FILL[st.v]} }; })
+  }, $('#rdExport'));
 });
 
 /* ================= Login ================= */

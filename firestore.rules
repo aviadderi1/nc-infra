@@ -45,6 +45,14 @@ service cloud.firestore {
             || (request.resource.data.photo is string && request.resource.data.photo.size() < 900000));
     }
 
+    // ---- מסד נתוני כשירויות – כל המנהלים קוראים ועורכים ----
+    match /readiness/{rowId} {
+      allow read, delete: if isManager();
+      allow create, update: if isManager()
+        && (!('photo' in request.resource.data) || request.resource.data.photo == null
+            || (request.resource.data.photo is string && request.resource.data.photo.size() < 900000));
+    }
+
     // ---- משתמשי הדשבורד ----
     match /users/{uid} {
       allow read: if isSuper() || (signedIn() && request.auth.uid == uid);
