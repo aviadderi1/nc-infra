@@ -241,8 +241,9 @@ select.in option{background:#16241c}
 .lightbox{position:fixed;inset:0;z-index:95;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 .lightbox.show{display:flex}
 .lightbox img{max-width:100%;max-height:100%;border-radius:8px}
-@media (min-width:1000px){.new-alert{top:calc((var(--tb) - 44px) / 2);padding:9px 18px}}
-@media (max-width:999px){#vDash{padding-top:calc(1.2dvh + 50px)}}
+@media (min-width:1400px){.new-alert{top:calc((var(--tb) - 44px) / 2);padding:9px 18px}}
+@media (max-width:1399px){#vDash{padding-top:calc(1.2dvh + 50px)}}
+#newAlert.off{display:none}
 @keyframes alertIn{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes blink{50%{opacity:.25}}
 
@@ -280,6 +281,51 @@ select.in option{background:#16241c}
 .rep textarea.in{height:90px;padding:8px 12px;resize:vertical;line-height:1.5}
 .rep-row.edit{align-items:center}
 .rep-log{margin-top:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;font-size:12px;color:var(--muted);line-height:1.8}
+
+/* ---------- Database (spreadsheet) ---------- */
+.db-view{max-width:none}
+.db-head{flex-wrap:wrap}
+.db-titles{display:flex;align-items:baseline;gap:12px}
+.db-count{color:var(--muted);font-size:14px}
+.db-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-xl{display:inline-flex;align-items:center;gap:8px;background:#1d6f42;color:#fff;border:1px solid #1d6f42;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:500}
+.btn-xl:hover{background:#21844e}
+.btn-xl[disabled]{opacity:.6;cursor:wait}
+.db-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:-8px 0 12px}
+.db-legend span{display:inline-flex;align-items:center;gap:6px}
+.db-legend .sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+.db-legend .sw.late{background:rgba(231,76,60,.35)}
+.db-legend .sw.auto{background:transparent;border-inline-start:3px solid var(--accent2)}
+.db-wrap{overflow:auto;max-height:calc(100dvh - var(--tb) - 170px);border:1px solid var(--line);border-radius:12px}
+table.db{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px;font-size:14px}
+table.db th{position:sticky;top:0;z-index:2;background:#1f3328;color:var(--accent2);font-weight:500;text-align:right;padding:10px 8px;
+  border-bottom:1px solid rgba(232,198,90,.4);border-inline-start:1px solid rgba(255,255,255,.08);white-space:nowrap}
+table.db td{border-bottom:1px solid rgba(255,255,255,.08);border-inline-start:1px solid rgba(255,255,255,.06);padding:0;height:40px;vertical-align:middle}
+table.db tr:hover td{background:rgba(255,255,255,.025)}
+table.db .rn{width:44px;text-align:center;color:var(--muted);font-size:12px;background:#17261e;position:relative}
+table.db th.rn{color:var(--muted)}
+table.db tr.auto td.rn{box-shadow:inset -3px 0 0 var(--accent2)}
+table.db tr.late td:not(.rn){background:rgba(231,76,60,.10)}
+.rn .del{display:none;position:absolute;inset:0;margin:auto;width:28px;height:28px;background:transparent;border:none;color:var(--danger);border-radius:6px}
+table.db tr:hover .rn .del{display:flex;align-items:center;justify-content:center}
+table.db tr:hover .rn .num{visibility:hidden}
+.rn .del svg{width:16px;height:16px}
+.cell{width:100%;height:40px;background:transparent;border:none;color:var(--text);font:inherit;font-size:14px;padding:0 8px}
+.cell:hover{background:rgba(255,255,255,.04)}
+.cell:focus{outline:2px solid var(--accent2);outline-offset:-2px;background:rgba(232,198,90,.07)}
+select.cell{appearance:none;cursor:pointer}
+select.cell option{background:#16241c;color:var(--text)}
+input[type=date].cell{color-scheme:dark}
+.cell.sev-c{color:#ff8a80}.cell.sev-m{color:#f5b06a}.cell.sev-l{color:#f1d36a}.cell.sev-ok{color:#7fdcb8}
+.col-div{min-width:118px}.col-name{min-width:170px}.col-det{min-width:240px}.col-bri{min-width:110px}
+.ph-cell{display:flex;align-items:center;gap:6px;padding:0 8px;height:40px}
+.ph-cell img{width:46px;height:32px;object-fit:cover;border-radius:4px;cursor:zoom-in}
+.ph-btn{background:transparent;border:1px dashed rgba(255,255,255,.25);color:var(--muted);border-radius:6px;height:30px;padding:0 10px;font-size:12px;display:inline-flex;align-items:center;gap:5px}
+.ph-btn:hover{color:var(--accent2);border-color:var(--accent2)}
+.ph-x{background:transparent;border:none;color:var(--muted);font-size:14px;width:22px;height:22px;border-radius:4px}
+.ph-x:hover{color:var(--danger)}
+.db-empty{padding:28px;text-align:center;color:var(--muted)}
+.saving{position:fixed;bottom:18px;left:18px;z-index:30;font-size:12px;color:var(--muted);background:#16241c;border:1px solid var(--line);border-radius:999px;padding:4px 12px}
 
 /* ---------- Toast / dialog ---------- */
 .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:#1f3328;border:1px solid rgba(232,198,90,.4);
@@ -381,6 +427,10 @@ select.in option{background:#16241c}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         <span class="n" id="bellCount" hidden>0</span>
       </button>
+      <button class="btn-ghost" id="btnDb" title="Create database">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 9v11M15 9v11"/></svg>
+        <span class="lbl">Create database</span>
+      </button>
       <button class="btn-ghost" id="btnUsers" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M19 8v6M16 11h6"/></svg>
         <span class="lbl">ניהול משתמשים</span>
@@ -437,6 +487,33 @@ select.in option{background:#16241c}
       <button class="tab" role="tab" data-filter="all" aria-selected="false">הכל</button>
     </div>
     <div class="rlist" id="detailList"></div>
+  </main>
+
+  <!-- Database -->
+  <main class="content view db-view" id="vDb" hidden>
+    <div class="page-head db-head">
+      <div class="db-titles"><h2>מסד נתונים</h2><span class="db-count" id="dbCount"></span></div>
+      <div class="db-actions">
+        <button class="btn-ghost" id="dbAdd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>הוסף שורה</button>
+        <button class="btn-xl" id="dbExport" aria-label="ייצוא לאקסל" title="ייצוא לאקסל">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="13" height="18" rx="2" fill="#fff"/><path d="M5 8l5 8M10 8l-5 8" stroke="#1d6f42" stroke-width="2.2" stroke-linecap="round"/><rect x="14" y="5" width="8" height="14" rx="1.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M14 9.5h8M14 14h8M18 5v14" stroke="#fff" stroke-width="1.2"/></svg>
+          <span>ייצוא לאקסל</span></button>
+        <button class="btn-ghost" data-back>חזרה ←</button>
+      </div>
+    </div>
+    <div class="db-legend">
+      <span><i class="sw late"></i>עבר תאריך הביקורת הנדרש ואין דיווח</span>
+      <span><i class="sw auto"></i>שורה שנוצרה מדיווח מהשטח</span>
+      <span>לחיצה על תא פותחת אותו לעריכה. כל שינוי נשמר אוטומטית</span>
+    </div>
+    <div class="db-wrap" id="dbWrap">
+      <table class="db" id="dbTable">
+        <thead><tr><th class="rn">#</th><th>אוגדה</th><th>חטיבה</th><th>סוג תשתית</th><th>שם תשתית</th><th>תאריך ביקורת נדרש</th><th>תאריך דיווח ביקורת</th><th>סוג תקלה</th><th>פירוט</th><th>תמונה</th></tr></thead>
+        <tbody id="dbBody"></tbody>
+      </table>
+    </div>
+    <input type="file" id="dbFile" accept="image/*" hidden>
   </main>
 
   <!-- Users -->
@@ -532,7 +609,7 @@ const pnEmail = pn => `${pn}@${EMAIL_DOMAIN}`;
 let FB = null;
 const fbReady = new Promise((res,rej)=>{ window.__fbResolve=res; setTimeout(()=>rej(new Error('timeout')),15000); });
 fbReady.then(fb=>{ FB=fb; setSrv('ok','מחובר לשרת'); }).catch(()=>setSrv('bad','אין חיבור לשרת. בדוק את החיבור לאינטרנט'));
-let REPORTS = [], USERS = [], unsubs = [], reportsLoaded = false, SEEN = new Set();
+let REPORTS = [], USERS = [], ASSETS = [], unsubs = [], reportsLoaded = false, assetsLoaded = false, SEEN = new Set();
 const store = {
   get(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } },
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -645,7 +722,8 @@ document.querySelectorAll('.lb-tab').forEach(t=>t.addEventListener('click',()=>{
 
 /* ================= Views ================= */
 function showView(id){
-  ['vDash','vDetail','vUsers'].forEach(v=>$('#'+v).hidden = v!==id);
+  ['vDash','vDetail','vUsers','vDb'].forEach(v=>$('#'+v).hidden = v!==id);
+  document.getElementById('newAlert').classList.toggle('off', id!=='vDash');
   window.scrollTo(0,0);
 }
 let detailId=null, detailFilter='open';
@@ -839,7 +917,14 @@ function startData(){
     refreshDetail();
     if($('#repBack').classList.contains('show') && !repEditing) renderReport();
     updateAlerts(added);
+    syncReportsToAssets();
   }, err=>toast('לא ניתן לקרוא דיווחים. '+authMsg(err))));
+  unsubs.push(FB.onSnapshot(FB.collection(FB.db,'assets'), snap=>{
+    ASSETS = snap.docs.map(d=>({ ...d.data(), id:d.id }));
+    assetsLoaded = true;
+    renderDb();
+    syncReportsToAssets();
+  }, err=>{ assetsLoaded=false; if(!$('#vDb').hidden) $('#dbBody').innerHTML=`<tr><td colspan="10" class="db-empty">לא ניתן לקרוא את מסד הנתונים. ${esc(authMsg(err))}. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase.</td></tr>`; }));
   if(current.role==='super'){
     unsubs.push(FB.onSnapshot(FB.collection(FB.db,'users'), snap=>{
       USERS = snap.docs.map(d=>({ ...d.data(), uid:d.id }));
@@ -847,7 +932,170 @@ function startData(){
     }, err=>toast('לא ניתן לקרוא משתמשים. '+authMsg(err))));
   }
 }
-function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; REPORTS=[]; USERS=[]; reportsLoaded=false; }
+function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; REPORTS=[]; USERS=[]; ASSETS=[]; reportsLoaded=false; assetsLoaded=false; }
+
+/* ================= Database (assets table) ================= */
+const DB_DIVS = ['אוגדה 91','אוגדה 210','אוגדה 146','אחר'];
+const DB_TYPES = ['מוצב','ציר','מכשול','מעבר','בסיס אש','תשתית רציפות תפקודית','מיגון','אחר'];
+const FAULTS = ['','קריטית','בינונית','נמוכה','ללא תקלה'];
+const SEV_TO_FAULT = {3:'קריטית',2:'בינונית',1:'נמוכה'};
+const FAULT_CLS = {'קריטית':'sev-c','בינונית':'sev-m','נמוכה':'sev-l','ללא תקלה':'sev-ok'};
+const FAULT_FILL = {'קריטית':'FFF8D3CF','בינונית':'FFFCE3C6','נמוכה':'FFFDF3C4','ללא תקלה':'FFD5F1E4'};
+const normKey = (t,n) => (String(t||'').trim()+'|'+String(n||'').trim().replace(/\s+/g,' ')).toLowerCase();
+function hashId(str){ let h=2166136261; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return 'a_'+(h>>>0).toString(36); }
+const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const isLate = a => a.requiredDate && !a.reportDate && a.requiredDate < todayISO();
+
+/* every field report creates or updates its infrastructure row (by type + name) */
+let syncing=false;
+async function syncReportsToAssets(){
+  if(syncing || !reportsLoaded || !assetsLoaded || !current) return;
+  syncing=true;
+  try{
+    const byKey = {}; ASSETS.forEach(a=>{ byKey[normKey(a.type,a.name)] = a; });
+    const latest = {};
+    REPORTS.forEach(r=>{ const k=normKey(r.type,r.name); if(!latest[k] || (r.createdAt||'')>(latest[k].createdAt||'')) latest[k]=r; });
+    for(const k in latest){
+      const r = latest[k], a = byKey[k];
+      if(a && (a.lastReportAt||'') >= (r.createdAt||'')) continue;
+      const data = { division:r.division||'', brigade:r.brigade||'', type:r.type||'', name:(r.name||'').trim().replace(/\s+/g,' '),
+        reportDate:r.date||'', faultType:SEV_TO_FAULT[r.severity]||'', details:r.details||'', photo:r.photo||null,
+        lastReportId:r.id, lastReportAt:r.createdAt||'', fromReport:true, updatedAt:new Date().toISOString(), updatedBy:'דיווח מהשטח' };
+      if(a) await FB.updateDoc(FB.doc(FB.db,'assets',a.id), data);
+      else await FB.setDoc(FB.doc(FB.db,'assets',hashId(k)), { ...data, requiredDate:'', createdAt:r.createdAt||new Date().toISOString() }, { merge:true });
+    }
+  }catch(e){ console.warn('sync', e); }
+  finally{ syncing=false; }
+}
+
+let dbPending=false;
+function renderDb(){
+  if($('#vDb').hidden) return;
+  if($('#dbTable').contains(document.activeElement) && document.activeElement.matches('.cell')){ dbPending=true; return; }
+  dbPending=false;
+  const rows = ASSETS.slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  $('#dbCount').textContent = `${rows.length} שורות`;
+  const opt = (arr,v) => arr.map(x=>`<option value="${esc(x)}" ${x===(v||'')?'selected':''}>${esc(x||'—')}</option>`).join('');
+  $('#dbBody').innerHTML = rows.length ? rows.map((a,i)=>`<tr data-id="${esc(a.id)}" class="${isLate(a)?'late':''} ${a.fromReport?'auto':''}">
+      <td class="rn"><span class="num">${i+1}</span><button class="del" data-del aria-label="מחק שורה ${i+1}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg></button></td>
+      <td class="col-div"><select class="cell" data-f="division">${opt(DB_DIVS.includes(a.division)||!a.division?['',...DB_DIVS]:['',a.division,...DB_DIVS],a.division)}</select></td>
+      <td class="col-bri"><input class="cell" data-f="brigade" value="${esc(a.brigade||'')}"></td>
+      <td><select class="cell" data-f="type">${opt(['',...DB_TYPES],a.type)}</select></td>
+      <td class="col-name"><input class="cell" data-f="name" value="${esc(a.name||'')}"></td>
+      <td><input class="cell" type="date" data-f="requiredDate" value="${esc(a.requiredDate||'')}"></td>
+      <td><input class="cell" type="date" data-f="reportDate" value="${esc(a.reportDate||'')}"></td>
+      <td><select class="cell ${FAULT_CLS[a.faultType]||''}" data-f="faultType">${opt(FAULTS,a.faultType)}</select></td>
+      <td class="col-det"><input class="cell" data-f="details" value="${esc(a.details||'')}" title="${esc(a.details||'')}"></td>
+      <td>${a.photo ? `<div class="ph-cell"><img src="${a.photo}" alt="תמונה" data-zoom><button class="ph-x" data-rmph aria-label="הסר תמונה">✕</button></div>`
+                    : `<div class="ph-cell"><button class="ph-btn" data-addph><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg>הוסף</button></div>`}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="10" class="db-empty">${assetsLoaded?'אין עדיין שורות. לחץ "הוסף שורה" או חכה לדיווח מהשטח':'טוען…'}</td></tr>`;
+}
+$('#dbTable').addEventListener('focusout',()=>setTimeout(()=>{ if(dbPending && !$('#dbTable').contains(document.activeElement)) renderDb(); },0));
+async function saveCell(id, field, value){
+  try{
+    await FB.updateDoc(FB.doc(FB.db,'assets',id), { [field]:value, updatedAt:new Date().toISOString(), updatedBy:current.name });
+  }catch(e){ toast('השינוי לא נשמר. '+authMsg(e)); }
+}
+$('#dbBody').addEventListener('change',e=>{
+  const el=e.target.closest('.cell'); if(!el) return;
+  const id=el.closest('tr').dataset.id, f=el.dataset.f;
+  let v=el.value; if(typeof v==='string') v=v.trim().replace(/\s+/g,' ');
+  if(f==='faultType'){ el.className='cell '+(FAULT_CLS[v]||''); }
+  if(f==='requiredDate'||f==='reportDate'){ const a=ASSETS.find(x=>x.id===id); if(a){ const t={...a,[f]:v}; el.closest('tr').classList.toggle('late',isLate(t)); } }
+  saveCell(id,f,v);
+});
+$('#dbBody').addEventListener('keydown',e=>{
+  if(e.key==='Enter' && e.target.matches('input.cell')){            // Enter moves down like Excel
+    e.preventDefault(); const td=e.target.closest('td'), tr=td.closest('tr'), idx=[...tr.children].indexOf(td);
+    const next=tr.nextElementSibling?.children[idx]?.querySelector('.cell'); e.target.blur(); next&&next.focus();
+  }
+});
+let dbPhotoRow=null;
+$('#dbBody').addEventListener('click',async e=>{
+  const tr=e.target.closest('tr'); if(!tr?.dataset.id) return; const id=tr.dataset.id;
+  if(e.target.closest('[data-addph]')){ dbPhotoRow=id; $('#dbFile').value=''; $('#dbFile').click(); }
+  else if(e.target.closest('[data-rmph]')){ saveCell(id,'photo',null); }
+  else if(e.target.closest('[data-zoom]')){ $('#lightbox img').src=e.target.src; $('#lightbox').classList.add('show'); }
+  else if(e.target.closest('[data-del]')){
+    const a=ASSETS.find(x=>x.id===id);
+    if(await confirmDlg(`למחוק את השורה${a?.name?' של '+a.name:''}?`)){
+      try{ await FB.deleteDoc(FB.doc(FB.db,'assets',id)); toast('השורה נמחקה'); }catch(err){ toast('המחיקה נכשלה. '+authMsg(err)); }
+    }
+  }
+});
+$('#dbFile').addEventListener('change',()=>{
+  const f=$('#dbFile').files[0]; if(!f||!dbPhotoRow) return;
+  const img=new Image(), url=URL.createObjectURL(f);
+  img.onload=()=>{ const k=Math.min(1,1000/Math.max(img.width,img.height)), c=document.createElement('canvas');
+    c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url); saveCell(dbPhotoRow,'photo',c.toDataURL('image/jpeg',.7)); };
+  img.onerror=()=>{ URL.revokeObjectURL(url); toast('לא ניתן לקרוא את התמונה'); };
+  img.src=url;
+});
+$('#dbAdd').addEventListener('click',async ()=>{
+  const id='m_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{
+    await FB.setDoc(FB.doc(FB.db,'assets',id),{ division:'', brigade:'', type:'', name:'', requiredDate:'', reportDate:'', faultType:'', details:'', photo:null,
+      fromReport:false, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), updatedBy:current.name });
+    setTimeout(()=>{ const c=document.querySelector(`#dbBody tr[data-id="${id}"] .cell`); if(c){ c.focus(); $('#dbWrap').scrollTop=$('#dbWrap').scrollHeight; } },150);
+  }catch(err){ toast('לא ניתן להוסיף שורה. '+authMsg(err)); }
+});
+$('#btnDb').addEventListener('click',()=>{ showView('vDb'); renderDb(); });
+
+/* ---- Excel export (ExcelJS, loaded on first use) ---- */
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load')); document.head.appendChild(s); }); }
+$('#dbExport').addEventListener('click',async ()=>{
+  const btn=$('#dbExport'); btn.disabled=true; const lbl=btn.querySelector('span'); const old=lbl.textContent; lbl.textContent='מכין קובץ…';
+  try{
+    if(!window.ExcelJS) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
+    const rows = ASSETS.slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+    const wb = new ExcelJS.Workbook(); wb.creator='אחזקת תשתיות מבצעיות פיקוד צפון'; wb.created=new Date();
+    const ws = wb.addWorksheet('מסד נתונים', { views:[{ rightToLeft:true, state:'frozen', ySplit:3 }],
+      pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, paperSize:9 } });
+    const heads=['#','אוגדה','חטיבה','סוג תשתית','שם תשתית','תאריך ביקורת נדרש','תאריך דיווח ביקורת','סוג תקלה','פירוט','תמונה'];
+    const widths=[5,13,14,18,24,17,17,12,46,16];
+    ws.columns = widths.map(w=>({ width:w }));
+    ws.mergeCells(1,1,1,heads.length);
+    const t=ws.getCell(1,1); t.value='מסד נתונים – אחזקת תשתיות מבצעיות פיקוד צפון';
+    t.font={ bold:true, size:16, color:{argb:'FF1F3328'} }; t.alignment={ horizontal:'right', vertical:'middle', readingOrder:'rtl' }; ws.getRow(1).height=28;
+    ws.mergeCells(2,1,2,heads.length);
+    const sub=ws.getCell(2,1); sub.value=`הופק ב-${new Date().toLocaleString('he-IL')} · ${rows.length} שורות · הופק ע״י ${current.name}`;
+    sub.font={ size:10, color:{argb:'FF6F7D72'} }; sub.alignment={ horizontal:'right', readingOrder:'rtl' };
+    const hr=ws.getRow(3); hr.values=heads; hr.height=24;
+    hr.eachCell(c=>{ c.font={ bold:true, color:{argb:'FFFFFFFF'} }; c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FF1F3328'} };
+      c.alignment={ horizontal:'center', vertical:'middle', readingOrder:'rtl', wrapText:true };
+      c.border={ bottom:{ style:'medium', color:{argb:'FFC9A227'} } }; });
+    const toDate = s => { if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); };
+    const thin={ style:'thin', color:{argb:'FFD0D7D2'} };
+    rows.forEach((a,i)=>{
+      const r = ws.getRow(4+i);
+      r.values=[i+1, a.division||'', a.brigade||'', a.type||'', a.name||'', toDate(a.requiredDate), toDate(a.reportDate), a.faultType||'', a.details||'', ''];
+      r.height = a.photo ? 62 : 22;
+      r.eachCell({ includeEmpty:true },(c,col)=>{
+        c.alignment={ horizontal: col===1?'center':'right', vertical:'middle', readingOrder:'rtl', wrapText: col===9 };
+        c.border={ top:thin, bottom:thin, left:thin, right:thin };
+        if(col===6||col===7) c.numFmt='dd/mm/yyyy';
+        if(isLate(a)) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFFDE2DF'} };
+        else if(i%2) c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FFF5F7F5'} };
+      });
+      const fc=r.getCell(8); if(FAULT_FILL[a.faultType]){ fc.fill={ type:'pattern', pattern:'solid', fgColor:{argb:FAULT_FILL[a.faultType]} }; fc.font={ bold:true }; }
+      if(a.photo && a.photo.startsWith('data:image/')){
+        const ext = a.photo.startsWith('data:image/png') ? 'png' : 'jpeg';
+        const imgId = wb.addImage({ base64:a.photo, extension:ext });
+        ws.addImage(imgId, { tl:{ col:9.08, row:3+i+0.06 }, ext:{ width:100, height:76 }, editAs:'oneCell' });
+      }
+    });
+    ws.autoFilter = { from:{ row:3, column:1 }, to:{ row:3+Math.max(rows.length,1), column:heads.length } };
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf],{ type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const d=new Date(), name=`מסד-נתונים-פיקוד-צפון-${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}.xlsx`;
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+    toast('הקובץ ירד: '+name);
+  }catch(err){ console.error(err); toast(err?.message==='load' ? 'לא ניתן לטעון את רכיב האקסל. בדוק את החיבור לאינטרנט' : 'הייצוא נכשל'); }
+  finally{ btn.disabled=false; lbl.textContent=old; }
+});
 
 /* ================= Login ================= */
 digitsOnly($('#lgPn')); digitsOnly($('#suPn'));
