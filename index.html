@@ -150,7 +150,20 @@ select.in option{background:#16241c}
   .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 /* Leaderboard (מדד ביקורות) */
-.top-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:2vw;width:min(1500px,100%);flex:none}
+.top-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-areas:"lb gauge crit";align-items:center;gap:2vw;width:min(1500px,100%);flex:none}
+.top-row .lb{grid-area:lb}.top-row .main-gauge{grid-area:gauge}.top-row .crit-tile{grid-area:crit}
+.crit-tile{justify-self:center;width:clamp(150px,15vw,210px);display:flex;flex-direction:column;align-items:center;gap:clamp(3px,.7dvh,8px);
+  background:rgba(231,76,60,.10);border:1px solid rgba(255,138,128,.55);border-radius:18px;padding:clamp(10px,1.8dvh,20px) 12px;color:var(--text);
+  transition:transform .15s,background .15s}
+.crit-tile:hover{transform:translateY(-3px);background:rgba(231,76,60,.18)}
+.crit-tile:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}
+.ct-head{display:flex;align-items:center;gap:7px;font-size:clamp(13px,1.9dvh,16px);font-weight:500}
+.ct-dot{width:10px;height:10px;border-radius:50%;background:#e74c3c;animation:blink 1.2s infinite}
+.ct-num{font-size:clamp(40px,8dvh,76px);font-weight:800;color:#ff8a80;line-height:1;font-variant-numeric:tabular-nums}
+.ct-sub{font-size:clamp(11px,1.5dvh,13px);color:var(--soft)}
+.ct-go{font-size:clamp(11px,1.5dvh,13px);color:var(--accent2)}
+.crit-tile.ok{background:rgba(93,202,165,.08);border-color:rgba(127,220,184,.5)}
+.crit-tile.ok .ct-num{color:#7fdcb8}.crit-tile.ok .ct-dot{background:#5DCAA5;animation:none}
 .lb{justify-self:center;width:min(380px,100%);background:var(--card);border:1px solid rgba(201,162,39,.3);border-radius:16px;
   padding:clamp(8px,1.4dvh,14px) clamp(10px,1.2vw,16px)}
 .lb-head{display:flex;align-items:center;gap:10px}
@@ -174,8 +187,10 @@ select.in option{background:#16241c}
 .lb-row .ct{text-align:left;font-weight:800;font-variant-numeric:tabular-nums;direction:ltr}
 .lb-empty{color:var(--muted);font-size:13px;padding:10px 0 4px;text-align:center}
 @media (max-aspect-ratio:1/1){
-  .top-row{grid-template-columns:1fr;gap:1dvh}
-  .top-spacer{display:none}
+  .top-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"lb crit" "gauge gauge";gap:1dvh 8px}
+  .crit-tile{width:auto;min-width:96px;padding:8px 10px;border-radius:14px;gap:2px}
+  .crit-tile .ct-go,.crit-tile .ct-sub{display:none}
+  .ct-head{font-size:12px}.ct-num{font-size:34px}
   .lb{width:100%;max-width:480px;padding:8px 12px}
   .lb-sub{display:none}
   .lb-row{margin-top:3px;font-size:12px}
@@ -287,6 +302,8 @@ select.in option{background:#16241c}
 .db-head{flex-wrap:wrap}
 .db-titles{display:flex;align-items:baseline;gap:12px}
 .db-count{color:var(--muted);font-size:14px}
+.db-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(231,76,60,.15);border:1px solid rgba(255,138,128,.5);color:#ff8a80;border-radius:999px;padding:3px 6px 3px 12px;font-size:13px;align-self:center}
+.db-chip button{background:rgba(255,138,128,.15);border:none;color:#ff8a80;width:22px;height:22px;border-radius:50%;font-size:12px}
 .db-actions{display:flex;gap:8px;flex-wrap:wrap}
 .btn-xl{display:inline-flex;align-items:center;gap:8px;background:#1d6f42;color:#fff;border:1px solid #1d6f42;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:500}
 .btn-xl:hover{background:#21844e}
@@ -473,7 +490,12 @@ input[type=date].cell{color-scheme:dark}
         <div class="lb-rows" id="lbRows"></div>
       </aside>
       <div class="main-gauge" id="mainGauge"></div>
-      <div class="top-spacer"></div>
+      <button class="crit-tile" id="critTile" aria-label="תקלות קריטיות פתוחות">
+        <span class="ct-head"><span class="ct-dot"></span>תקלות קריטיות</span>
+        <span class="ct-num" id="critNum">–</span>
+        <span class="ct-sub" id="critSub">טוען…</span>
+        <span class="ct-go">לצפייה בטבלה ←</span>
+      </button>
     </div>
     <div class="sep"></div>
     <div class="grid" id="gaugeGrid"></div>
@@ -500,7 +522,8 @@ input[type=date].cell{color-scheme:dark}
   <!-- Database -->
   <main class="content view db-view" id="vDb" hidden>
     <div class="page-head db-head">
-      <div class="db-titles"><h2>מסד נתונים</h2><span class="db-count" id="dbCount"></span></div>
+      <div class="db-titles"><h2>מסד נתונים</h2><span class="db-count" id="dbCount"></span>
+        <span class="db-chip" id="dbChip" hidden>מציג: תקלות קריטיות פתוחות <button id="dbChipX" aria-label="הצג את כל הטבלה">✕</button></span></div>
       <div class="db-actions">
         <button class="btn-ghost" id="dbAdd">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>הוסף שורה</button>
@@ -678,6 +701,7 @@ function weightedTotal(){            // כרגע משקל שווה לכל השע
 function renderDashboard(){
   computeGauges();
   renderLeaderboard();
+  renderCrit();
   const total = weightedTotal();
   $('#mainGauge').innerHTML = `<button class="gauge-btn" data-open="${TOTAL.id}" aria-label="${TOTAL.name} ${total}%">
       <div class="g-label">${TOTAL.name}</div>${gaugeHTML('var(--gm)','calc(var(--gm) * .085)','calc(var(--gm) * .23)')}</button>`;
@@ -930,7 +954,7 @@ function startData(){
   unsubs.push(FB.onSnapshot(FB.collection(FB.db,'assets'), snap=>{
     ASSETS = snap.docs.map(d=>({ ...d.data(), id:d.id }));
     assetsLoaded = true;
-    renderDb();
+    renderDb(); renderCrit();
     syncReportsToAssets();
   }, err=>{ assetsLoaded=false; if(!$('#vDb').hidden) $('#dbBody').innerHTML=`<tr><td colspan="12" class="db-empty">לא ניתן לקרוא את מסד הנתונים. ${esc(authMsg(err))}. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase.</td></tr>`; }));
   if(current.role==='super'){
@@ -978,12 +1002,26 @@ async function syncReportsToAssets(){
   finally{ syncing=false; }
 }
 
-let dbPending=false;
+let dbPending=false, dbFilter=null;
+const isCritOpen = a => a.faultType==='קריטית' && treatOf(a)!=='טופל';
+const dbRows = () => ASSETS.filter(a => dbFilter==='critOpen' ? isCritOpen(a) : true).sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+function renderCrit(){
+  const t=$('#critTile'); if(!t) return;
+  if(!assetsLoaded){ $('#critNum').textContent='–'; $('#critSub').textContent='טוען…'; return; }
+  const open=ASSETS.filter(isCritOpen).length, all=ASSETS.filter(a=>a.faultType==='קריטית').length;
+  $('#critNum').textContent=open;
+  $('#critSub').textContent= all ? `פתוחות · מתוך ${all} קריטיות` : 'אין תקלות קריטיות';
+  t.classList.toggle('ok', open===0);
+  t.setAttribute('aria-label', `${open} תקלות קריטיות פתוחות. לחץ לצפייה בטבלה`);
+}
+$('#critTile').addEventListener('click',()=>{ dbFilter='critOpen'; showView('vDb'); renderDb(); });
+$('#dbChipX').addEventListener('click',()=>{ dbFilter=null; renderDb(); });
 function renderDb(){
   if($('#vDb').hidden) return;
   if($('#dbTable').contains(document.activeElement) && document.activeElement.matches('.cell')){ dbPending=true; return; }
   dbPending=false;
-  const rows = ASSETS.slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  const rows = dbRows();
+  $('#dbChip').hidden = dbFilter!=='critOpen';
   $('#dbCount').textContent = `${rows.length} שורות`;
   const opt = (arr,v) => arr.map(x=>`<option value="${esc(x)}" ${x===(v||'')?'selected':''}>${esc(x||'—')}</option>`).join('');
   $('#dbBody').innerHTML = rows.length ? rows.map((a,i)=>`<tr data-id="${esc(a.id)}" class="${isLate(a)?'late':''} ${a.fromReport?'auto':''}">
@@ -1001,7 +1039,7 @@ function renderDb(){
       <td>${a.photo ? `<div class="ph-cell"><img src="${a.photo}" alt="תמונה" data-zoom><button class="ph-x" data-rmph aria-label="הסר תמונה">✕</button></div>`
                     : `<div class="ph-cell"><button class="ph-btn" data-addph><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg>הוסף</button></div>`}</td>
     </tr>`).join('')
-    : `<tr><td colspan="12" class="db-empty">${assetsLoaded?'אין עדיין שורות. לחץ "הוסף שורה" או חכה לדיווח מהשטח':'טוען…'}</td></tr>`;
+    : `<tr><td colspan="12" class="db-empty">${assetsLoaded && dbFilter==='critOpen' ? 'אין תקלות קריטיות פתוחות' : assetsLoaded?'אין עדיין שורות. לחץ "הוסף שורה" או חכה לדיווח מהשטח':'טוען…'}</td></tr>`;
 }
 $('#dbTable').addEventListener('focusout',()=>setTimeout(()=>{ if(dbPending && !$('#dbTable').contains(document.activeElement)) renderDb(); },0));
 async function saveCell(id, field, value){
@@ -1064,7 +1102,7 @@ $('#dbAdd').addEventListener('click',async ()=>{
     setTimeout(()=>{ const c=document.querySelector(`#dbBody tr[data-id="${id}"] .cell`); if(c){ c.focus(); $('#dbWrap').scrollTop=$('#dbWrap').scrollHeight; } },150);
   }catch(err){ toast('לא ניתן להוסיף שורה. '+authMsg(err)); }
 });
-$('#btnDb').addEventListener('click',()=>{ showView('vDb'); renderDb(); });
+$('#btnDb').addEventListener('click',()=>{ dbFilter=null; showView('vDb'); renderDb(); });
 
 /* ---- Excel export (ExcelJS, loaded on first use) ---- */
 function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load')); document.head.appendChild(s); }); }
@@ -1072,7 +1110,7 @@ $('#dbExport').addEventListener('click',async ()=>{
   const btn=$('#dbExport'); btn.disabled=true; const lbl=btn.querySelector('span'); const old=lbl.textContent; lbl.textContent='מכין קובץ…';
   try{
     if(!window.ExcelJS) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
-    const rows = ASSETS.slice().sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+    const rows = dbRows();
     const wb = new ExcelJS.Workbook(); wb.creator='אחזקת תשתיות מבצעיות פיקוד צפון'; wb.created=new Date();
     const ws = wb.addWorksheet('מסד נתונים', { views:[{ rightToLeft:true, state:'frozen', ySplit:3 }],
       pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, paperSize:9 } });
@@ -1083,7 +1121,7 @@ $('#dbExport').addEventListener('click',async ()=>{
     const t=ws.getCell(1,1); t.value='מסד נתונים – אחזקת תשתיות מבצעיות פיקוד צפון';
     t.font={ bold:true, size:16, color:{argb:'FF1F3328'} }; t.alignment={ horizontal:'right', vertical:'middle', readingOrder:'rtl' }; ws.getRow(1).height=28;
     ws.mergeCells(2,1,2,heads.length);
-    const sub=ws.getCell(2,1); sub.value=`הופק ב-${new Date().toLocaleString('he-IL')} · ${rows.length} שורות · הופק ע״י ${current.name}`;
+    const sub=ws.getCell(2,1); sub.value=`הופק ב-${new Date().toLocaleString('he-IL')} · ${rows.length} שורות${dbFilter==='critOpen'?' · תקלות קריטיות פתוחות בלבד':''} · הופק ע״י ${current.name}`;
     sub.font={ size:10, color:{argb:'FF6F7D72'} }; sub.alignment={ horizontal:'right', readingOrder:'rtl' };
     const hr=ws.getRow(3); hr.values=heads; hr.height=24;
     hr.eachCell(c=>{ c.font={ bold:true, color:{argb:'FFFFFFFF'} }; c.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FF1F3328'} };
