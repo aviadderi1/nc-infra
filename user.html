@@ -68,7 +68,7 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
 .sev label:has(input:checked) .dot,.sev label.on .dot{box-shadow:0 0 0 4px rgba(255,255,255,.18)}
 .sev label:has(input:focus-visible){outline:2px solid var(--accent2);outline-offset:2px}
 .vh{position:absolute!important;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.photo{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;position:relative}
+.photo{display:block;border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;position:relative}
 .photo svg{width:28px;height:28px;color:var(--accent2)}
 .photo img{max-width:100%;max-height:220px;border-radius:10px;display:block;margin:0 auto 10px}
 .photo .acts{display:flex;gap:8px;justify-content:center}
@@ -134,27 +134,31 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
     <input class="in" id="role" placeholder="לדוגמה: מפקד מוצב / קצין אג״ם" autocomplete="organization-title">
     <div class="err" data-for="role"></div></div>
 
-  <div class="f"><label class="l" for="division">2. גזרה <b>*</b></label>
+  <div class="f"><label class="l" for="phone">2. טלפון נייד <b>*</b></label>
+    <input class="in" id="phone" type="tel" inputmode="tel" placeholder="05X-XXXXXXX" autocomplete="tel" dir="ltr" style="text-align:right" maxlength="14">
+    <div class="err" data-for="phone"></div></div>
+
+  <div class="f"><label class="l" for="division">3. גזרה <b>*</b></label>
     <select class="in" id="division"><option value="">בחר גזרה</option>
-      <option>אוגדה 91</option><option>אוגדה 210</option><option>אוגדה 146</option></select>
+      <option>אוגדה 91</option><option>אוגדה 36</option><option>אוגדה 210</option></select>
     <div class="err" data-for="division"></div></div>
 
-  <div class="f"><label class="l" for="brigade">3. חטיבה <b>*</b></label>
+  <div class="f"><label class="l" for="brigade">4. חטיבה <b>*</b></label>
     <div id="briWrap"><input class="in" id="brigade" placeholder="שם או מספר החטיבה" autocomplete="off"></div>
     <div class="err" data-for="brigade"></div></div>
 
-  <div class="f"><label class="l" for="type">4. סוג התשתית <b>*</b></label>
+  <div class="f"><label class="l" for="type">5. סוג התשתית <b>*</b></label>
     <select class="in" id="type"><option value="">בחר סוג תשתית</option>
-      <option>מוצב</option><option>ציר</option><option>מכשול</option><option>מעבר</option><option>בסיס אש</option>
+      <option>מוצב</option><option>ציר</option><option>מכשול</option><option value="מעבר">מעברים</option><option>בסיס אש</option>
       <option>תשתית רציפות תפקודית</option><option>מיגון</option><option>אחר</option></select>
     <div class="err" data-for="type"></div></div>
 
-  <div class="f"><label class="l" for="name">5. שם התשתית <b>*</b></label>
+  <div class="f"><label class="l" for="name">6. שם התשתית <b>*</b></label>
     <input class="in" id="name" placeholder="שם המוצב / הציר / המתקן" autocomplete="off">
     <div class="err" data-for="name"></div></div>
 
 
-  <div class="f"><span class="l">6. סיווג התקלה <b>*</b></span>
+  <div class="f"><span class="l">7. סיווג התקלה <b>*</b></span>
     <div class="sev" id="sev" role="radiogroup" aria-label="סיווג התקלה">
       <label style="--c:var(--crit)"><input type="radio" name="sev" value="3" class="vh"><span class="dot" style="background:var(--crit)"></span>
         <span><span class="nm" style="color:#ff8a80">קריטית</span> – פגיעה ברציפות התפקוד או בבטיחות</span></label>
@@ -165,11 +169,11 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
     </div>
     <div class="err" data-for="sev"></div></div>
 
-  <div class="f"><label class="l" for="details">7. פירוט התקלה <b>*</b></label>
+  <div class="f"><label class="l" for="details">8. פירוט התקלה <b>*</b></label>
     <textarea class="in" id="details" placeholder="תאר בקצרה את התקלה, מה נפגע ומה המשמעות שלה"></textarea>
     <div class="err" data-for="details"></div></div>
 
-  <div class="f"><span class="l">8. תמונת התקלה</span>
+  <div class="f"><span class="l">9. תמונת התקלה</span>
     <input type="file" id="fileCam" accept="image/*" capture="environment" class="vh" tabindex="-1">
     <input type="file" id="fileGal" accept="image/*" class="vh" tabindex="-1">
     <label class="photo" id="photo" for="sheetToggle" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg><div style="margin-top:6px">הוסף תמונה</div></label></div>
@@ -216,7 +220,9 @@ let severity=null, photoData=null;
 
 /* divisions and brigades come from the structure table (managed in the dashboard) */
 let STRUCT=[];
-const LS_LAST='nc_last_unit';
+const LS_LAST='nc_last_unit', LS_PHONE='nc_phone';
+const phoneOk = v => /^0\d{8,9}$/.test(v.replace(/[\s-]/g,''));
+try{ const ph=localStorage.getItem(LS_PHONE); if(ph) document.getElementById('phone').value=ph; }catch(_){}
 function renderDivs(){
   if(!STRUCT.length) return;
   const cur=$('#division').value;
@@ -284,25 +290,27 @@ function setErr(id,msg){
   const el=id==='saveErr'?$('#saveErr'):document.querySelector(`.err[data-for="${id}"]`);if(el)el.textContent=msg;
   const inp=document.getElementById(id);if(inp&&inp.classList.contains('in'))inp.classList.toggle('bad',!!msg);
 }
-['role','division','type','name','details'].forEach(id=>$('#'+id).addEventListener('input',()=>setErr(id,'')));
+['role','phone','division','type','name','details'].forEach(id=>$('#'+id).addEventListener('input',()=>setErr(id,'')));
 
 $('#form').addEventListener('submit',async e=>{
   e.preventDefault();setErr('saveErr','');
   const v=id=>$('#'+id).value.trim();
-  const req={role:'הזן את תפקיד המדווח',division:'בחר גזרה',brigade:'בחר חטיבה',type:'בחר סוג תשתית',name:'הזן את שם התשתית',details:'תאר את התקלה'};
+  const req={role:'הזן את תפקיד המדווח',phone:'הזן מספר טלפון לחזרה',division:'בחר גזרה',brigade:'בחר חטיבה',type:'בחר סוג תשתית',name:'הזן את שם התשתית',details:'תאר את התקלה'};
   let first=null;
   for(const id in req){if(!v(id)){setErr(id,req[id]);first=first||id;}}
+  if(v('phone') && !phoneOk(v('phone'))){setErr('phone','מספר טלפון לא תקין');first=first||'phone';}
   if(!severity){setErr('sev','בחר סיווג תקלה');first=first||'sev';}
+  const order=['role','phone','division','brigade','type','name','sev','details']; if(first) first=order.find(k=>document.querySelector(`.err[data-for="${k}"]`)?.textContent)||first;
   if(first){(document.getElementById(first)||$('#sev')).scrollIntoView({behavior:'smooth',block:'center'});return;}
 
   if(!navigator.onLine){ setErr('saveErr','אין חיבור לאינטרנט. התחבר ונסה שוב, הטופס נשמר על המסך.'); return; }
-  const report={role:v('role'),division:v('division'),brigade:v('brigade').replace(/\s+/g,' '),family:v('type'),infraName:v('name').replace(/\s+/g,' '),
+  const report={role:v('role'),phone:v('phone').replace(/[\s-]/g,''),division:v('division'),brigade:v('brigade').replace(/\s+/g,' '),family:v('type'),infraName:v('name').replace(/\s+/g,' '),
     severity,details:v('details'),photo:photoData,status:'received',createdAt:new Date().toISOString()};
   const btn=$('#send'), label=btn.innerHTML; btn.disabled=true; btn.textContent='שולח…';
   try{
     const api = await withTimeout(fbReady,15000);
     report.seq = await withTimeout(api.send(report), 25000);
-    try{ localStorage.setItem(LS_LAST,JSON.stringify({division:report.division,brigade:report.brigade})); }catch(_){}
+    try{ localStorage.setItem(LS_LAST,JSON.stringify({division:report.division,brigade:report.brigade})); localStorage.setItem(LS_PHONE,report.phone); }catch(_){}
     showDone(report);
   }catch(err){
     const c=err?.code||err?.message||'';
@@ -327,8 +335,8 @@ function showDone(r,note){
   $('#again').onclick=resetForm;
 }
 function resetForm(){
-  const keepRole=$('#role').value,keepDiv=$('#division').value,keepBri=$('#brigade').value;
-  $('#form').reset();$('#role').value=keepRole;$('#division').value=keepDiv;renderBri(keepBri);
+  const keepPhone=$('#phone').value, keepRole=$('#role').value,keepDiv=$('#division').value,keepBri=$('#brigade').value;
+  $('#form').reset();$('#role').value=keepRole;$('#phone').value=keepPhone;$('#division').value=keepDiv;renderBri(keepBri);
   severity=null;photoData=null;renderPhoto();
   syncSev();
   $('#done').hidden=true;$('#form').hidden=false;window.scrollTo(0,0);

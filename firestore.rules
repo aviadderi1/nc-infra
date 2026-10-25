@@ -1,16 +1,16 @@
 rules_version = '2';
 
-// אחזקת תשתיות מבצעיות פיקוד צפון – חוקי אבטחה ל-Firestore (שלב א')
+// אחזקת תשתיות מבצעיות פיקוד צפון – חוקי אבטחה ל-Firestore (שלבים א'+ב')
 // להדבקה ב: Firebase Console ← Firestore Database ← Rules ← Publish
 //
 // תפקידים (שדה role במסמך המשתמש):
-//   super   – מנהל מערכת (מנהל משתמשים ומבנה, וכל ההרשאות)
+//   super   – מנהל מערכת (משתמשים ומבנה, וכל ההרשאות בכל הפיקוד)
 //   ran     – רע"ן / ענף ארגון המרחב (כל ההרשאות, כל הפיקוד)
-//   divEng  – קצין הנדסה אוגדתי (כל ההרשאות, כל הפיקוד)
-//   brigEng – קצין הנדסה חטיבתי (החטיבה שלו: שיוך, טיפול, סגירה, מאגר; לא מועד יעד)
-//   maint   – רמ"ד תחזוקה (צפייה בכל, ללא שינויים)
-//   exec    – גורם ביצוע ואחזקה (רק תקלות ששויכו אליו: בטיפול / ממתינה לאימות, פעולות, חסמים)
-// מדווח מהשטח – כניסה אנונימית, יכול רק לפתוח תקלה חדשה.
+//   divEng  – קצין הנדסה אוגדתי (כל ההרשאות, רק באוגדה שלו)
+//   brigEng – קצין הנדסה חטיבתי (החטיבה שלו: שיוך, טיפול, סגירה, מאגר, אישור ביקורות; לא מועד יעד ולא תוכנית ביקורות)
+//   maint   – רמ"ד תחזוקה (צפייה בכל הפיקוד, ללא שינויים)
+//   exec    – גורם ביצוע ואחזקה (רק תקלות ששויכו אליו)
+// מדווח / מבצע ביקורת מהשטח – כניסה אנונימית: רק פתיחת תקלה חדשה או דיווח ביקורת חדש.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -19,14 +19,21 @@ service cloud.firestore {
     function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function me()         { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
     function isSys()      { return hasProfile() && me().role == 'super'; }
-    function isFull()     { return hasProfile() && me().role in ['super', 'ran', 'divEng']; }
-    function isViewAll()  { return hasProfile() && me().role in ['super', 'ran', 'divEng', 'maint']; }
+    function isCmd()      { return hasProfile() && me().role in ['super', 'ran']; }
+    function isCmdView()  { return hasProfile() && me().role in ['super', 'ran', 'maint']; }
+    function isDiv()      { return hasProfile() && me().role == 'divEng'; }
     function isBrig()     { return hasProfile() && me().role == 'brigEng'; }
     function isExec()     { return hasProfile() && me().role == 'exec'; }
     function isOwner()    { return signedIn() && request.auth.token.email == '1234567@nc-infra.app'; }
+    function inMyDiv(d)     { return d.division == me().division; }
     function inMyBrigade(d) { return d.division == me().division && d.brigade == me().brigade; }
+    // מי רשאי לפעול ברשומה d (תקלה / תשתית / תוכנית): פיקוד בכל מקום, אוגדה באוגדה שלה
+    function canActFull(d)  { return isCmd() || (isDiv() && inMyDiv(d)); }
+    // מי רואה רשומה d
+    function canView(d)     { return isCmdView() || (isDiv() && inMyDiv(d)) || (isBrig() && inMyBrigade(d)); }
     function counterPath(){ return /databases/$(database)/documents/meta/counter; }
     function photoOk(d)   { return !('photo' in d) || d.photo == null || (d.photo is string && d.photo.size() < 900000); }
+    function str(v, max)  { return v is string && v.size() < max; }
 
     // ---- מספור תקלות: המונה עולה ב-1 בדיוק, ורק יחד עם יצירת התקלה שמקבלת את המספר ----
     match /meta/counter {
@@ -39,34 +46,32 @@ service cloud.firestore {
 
     // ---- מונה מזהי תשתית (T-0001) ----
     match /meta/infraCounter {
-      allow read: if isFull() || isBrig();
-      allow create: if (isFull() || isBrig()) && request.resource.data.n == 1;
-      allow update: if (isFull() || isBrig()) && request.resource.data.n == resource.data.n + 1;
+      allow read: if isCmd() || isDiv() || isBrig();
+      allow create: if (isCmd() || isDiv() || isBrig()) && request.resource.data.n == 1;
+      allow update: if (isCmd() || isDiv() || isBrig()) && request.resource.data.n == resource.data.n + 1;
     }
 
     // ---- תקלות ----
     match /faults/{id} {
-      allow read: if isViewAll()
-        || (isBrig() && inMyBrigade(resource.data))
-        || (isExec() && resource.data.execUid == request.auth.uid);
+      allow read: if canView(resource.data) || (isExec() && resource.data.execUid == request.auth.uid);
 
       // דיווח מהשטח (כולל אנונימי): רק תקלה חדשה, בפורמט הנכון, עם המספר הבא במונה
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['seq','role','division','brigade','family','infraName','severity',
-                                                 'details','photo','status','createdAt','serverTime'])
+        && request.resource.data.keys().hasOnly(['seq','role','phone','division','brigade','family','infraName','severity',
+                                                 'details','photo','status','createdAt','serverTime','inspectionId'])
         && request.resource.data.seq == getAfter(counterPath()).data.n
         && request.resource.data.status == 'received'
         && request.resource.data.severity in [1, 2, 3]
         && request.resource.data.infraName is string && request.resource.data.infraName.size() > 0 && request.resource.data.infraName.size() < 200
         && request.resource.data.details is string   && request.resource.data.details.size() > 0   && request.resource.data.details.size() < 3000
-        && request.resource.data.role is string      && request.resource.data.role.size() < 100
+        && str(request.resource.data.role, 100)      && str(request.resource.data.phone, 20)
         && request.resource.data.family is string    && request.resource.data.division is string
-        && request.resource.data.brigade is string   && request.resource.data.brigade.size() < 100
+        && str(request.resource.data.brigade, 100)
         && request.resource.data.createdAt is string
         && photoOk(request.resource.data);
 
       allow update: if photoOk(request.resource.data) && (
-           isFull()
+           (canActFull(resource.data) && canActFull(request.resource.data))
         || (isBrig() && inMyBrigade(resource.data) && inMyBrigade(request.resource.data)
             && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['targetDate', 'seq', 'createdAt']))
         || (isExec() && resource.data.execUid == request.auth.uid
@@ -79,13 +84,45 @@ service cloud.firestore {
 
     // ---- מאגר תשתיות ----
     match /infra/{id} {
-      allow read: if isViewAll() || (isBrig() && inMyBrigade(resource.data));
-      allow create: if isFull() || (isBrig() && inMyBrigade(request.resource.data));
-      allow update: if isFull() || (isBrig() && inMyBrigade(resource.data) && inMyBrigade(request.resource.data));
-      allow delete: if isFull();
+      allow read: if canView(resource.data);
+      allow create: if canActFull(request.resource.data) || (isBrig() && inMyBrigade(request.resource.data));
+      allow update: if (canActFull(resource.data) && canActFull(request.resource.data))
+        || (isBrig() && inMyBrigade(resource.data) && inMyBrigade(request.resource.data));
+      allow delete: if canActFull(resource.data);
     }
 
-    // ---- מבנה אוגדות וחטיבות (נדרש גם לטופס הדיווח) ----
+    // ---- תוכנית ביקורות יזומות (מוזנת ע"י קצין הנדסה אוגדתי / פיקוד) ----
+    match /inspPlans/{id} {
+      allow read: if canView(resource.data);
+      allow create: if canActFull(request.resource.data);
+      allow update: if canActFull(resource.data) && canActFull(request.resource.data);
+      allow delete: if canActFull(resource.data);
+    }
+
+    // ---- דיווחי ביצוע ביקורת ----
+    match /inspections/{id} {
+      allow read: if canView(resource.data);
+      // דיווח מהשטח (כולל אנונימי): נכנס תמיד כ"ממתין לאישור"
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['inspector','phone','division','brigade','family','infraName','doneDate','result',
+                                                 'findings','photo','status','occKey','faultIds','createdAt','serverTime'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.result in ['ok', 'findings']
+        && str(request.resource.data.inspector, 100) && request.resource.data.inspector.size() > 0
+        && str(request.resource.data.phone, 20)
+        && request.resource.data.infraName is string && request.resource.data.infraName.size() > 0 && request.resource.data.infraName.size() < 200
+        && str(request.resource.data.findings, 3000)
+        && request.resource.data.division is string && str(request.resource.data.brigade, 100)
+        && request.resource.data.doneDate is string && request.resource.data.createdAt is string
+        && photoOk(request.resource.data);
+      // אישור / דחייה / קישור לתוכנית: חטיבה בחטיבה שלה, אוגדה באוגדה שלה, פיקוד בכל מקום
+      allow update: if photoOk(request.resource.data) && (
+           (canActFull(resource.data) && canActFull(request.resource.data))
+        || (isBrig() && inMyBrigade(resource.data) && inMyBrigade(request.resource.data)));
+      allow delete: if canActFull(resource.data);
+    }
+
+    // ---- מבנה אוגדות וחטיבות + סמלים (נדרש גם לטפסים הפתוחים) ----
     match /structure/{divId} {
       allow read: if true;
       allow write: if isSys();
@@ -93,7 +130,7 @@ service cloud.firestore {
 
     // ---- משתמשי הדשבורד ----
     match /users/{uid} {
-      allow read: if isViewAll() || isBrig() || (signedIn() && request.auth.uid == uid);
+      allow read: if isCmdView() || isDiv() || isBrig() || (signedIn() && request.auth.uid == uid);
       allow create: if isSys()
         || (isOwner() && request.auth.uid == uid && request.resource.data.role == 'super');
       allow update, delete: if isSys();
