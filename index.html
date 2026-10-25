@@ -622,6 +622,17 @@ table.db.fl tbody tr,table.db.ir tbody tr{cursor:pointer}
 
 .emb-img.has{background:transparent;border:none;border-radius:0;overflow:visible}
 .emb-img.has img{filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+.emb-img{width:clamp(46px,8.2dvh,78px);height:clamp(46px,8.2dvh,78px)}
+.emb-img.has{width:clamp(40px,7.2dvh,68px)}
+.emb.sm .emb-img{width:clamp(38px,6.4dvh,60px);height:clamp(38px,6.4dvh,60px)}
+.emb.sm .emb-img.has{width:clamp(34px,5.6dvh,52px)}
+.emb-img b{font-size:clamp(15px,2.6dvh,22px)}
+.emb-t{font-size:clamp(11px,1.6dvh,13.5px)}
+.emb{min-width:76px}
+@media (max-aspect-ratio:1/1){ .emb-img{width:54px;height:54px} .emb-img.has{width:46px} .emb.sm .emb-img{width:42px;height:42px} .emb.sm .emb-img.has{width:36px} .emb{min-width:58px} }
+.sd-head .emb-img,.sd-head .emb-img.has{width:48px;height:48px}
+.chip .emb-img,.chip .emb-img.has{width:26px;height:26px}
+@media (max-height:700px) and (min-aspect-ratio:1/1){ .emb-img{width:44px;height:44px} .emb-img.has{width:38px} .emb.sm .emb-img{width:36px;height:36px} .emb{padding:2px 6px;gap:1px} }
 
 #vDash{align-items:stretch;overflow:auto}
 @media (max-width:1399px){body:has(#newAlert:not([hidden]):not(.off)) #vDash{padding-top:calc(1.2dvh + 54px)}}
