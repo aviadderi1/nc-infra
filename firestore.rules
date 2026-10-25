@@ -1,67 +1,102 @@
 rules_version = '2';
 
-// אחזקת תשתיות מבצעיות פיקוד צפון – חוקי אבטחה ל-Firestore
+// אחזקת תשתיות מבצעיות פיקוד צפון – חוקי אבטחה ל-Firestore (שלב א')
 // להדבקה ב: Firebase Console ← Firestore Database ← Rules ← Publish
 //
-// מנהל ראשי: המספר האישי שמופיע ב-OWNER_EMAIL (חייב להיות זהה ל-OWNER_PN בקובץ index.html)
+// תפקידים (שדה role במסמך המשתמש):
+//   super   – מנהל מערכת (מנהל משתמשים ומבנה, וכל ההרשאות)
+//   ran     – רע"ן / ענף ארגון המרחב (כל ההרשאות, כל הפיקוד)
+//   divEng  – קצין הנדסה אוגדתי (כל ההרשאות, כל הפיקוד)
+//   brigEng – קצין הנדסה חטיבתי (החטיבה שלו: שיוך, טיפול, סגירה, מאגר; לא מועד יעד)
+//   maint   – רמ"ד תחזוקה (צפייה בכל, ללא שינויים)
+//   exec    – גורם ביצוע ואחזקה (רק תקלות ששויכו אליו: בטיפול / ממתינה לאימות, פעולות, חסמים)
+// מדווח מהשטח – כניסה אנונימית, יכול רק לפתוח תקלה חדשה.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn()  { return request.auth != null; }
-    function profile()   { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
-    function isManager() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
-    function isSuper()   { return isManager() && profile().role == 'super'; }
-    function isOwner()   { return signedIn() && request.auth.token.email == '1234567@nc-infra.app'; }
+    function signedIn()   { return request.auth != null; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function me()         { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isSys()      { return hasProfile() && me().role == 'super'; }
+    function isFull()     { return hasProfile() && me().role in ['super', 'ran', 'divEng']; }
+    function isViewAll()  { return hasProfile() && me().role in ['super', 'ran', 'divEng', 'maint']; }
+    function isBrig()     { return hasProfile() && me().role == 'brigEng'; }
+    function isExec()     { return hasProfile() && me().role == 'exec'; }
+    function isOwner()    { return signedIn() && request.auth.token.email == '1234567@nc-infra.app'; }
+    function inMyBrigade(d) { return d.division == me().division && d.brigade == me().brigade; }
+    function counterPath(){ return /databases/$(database)/documents/meta/counter; }
+    function photoOk(d)   { return !('photo' in d) || d.photo == null || (d.photo is string && d.photo.size() < 900000); }
 
-    // ---- דיווחי תקלות ----
-    match /reports/{reportId} {
-      // מנהלים בלבד רואים דיווחים
-      allow read: if isManager();
+    // ---- מספור תקלות: המונה עולה ב-1 בדיוק, ורק יחד עם יצירת התקלה שמקבלת את המספר ----
+    match /meta/counter {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.n == 1
+        && getAfter(/databases/$(database)/documents/faults/$(request.resource.data.lastId)).data.seq == 1;
+      allow update: if signedIn() && request.resource.data.n == resource.data.n + 1
+        && getAfter(/databases/$(database)/documents/faults/$(request.resource.data.lastId)).data.seq == request.resource.data.n;
+    }
 
-      // כל מדווח (כולל אנונימי) יכול רק ליצור דיווח חדש, בפורמט הנכון
+    // ---- מונה מזהי תשתית (T-0001) ----
+    match /meta/infraCounter {
+      allow read: if isFull() || isBrig();
+      allow create: if (isFull() || isBrig()) && request.resource.data.n == 1;
+      allow update: if (isFull() || isBrig()) && request.resource.data.n == resource.data.n + 1;
+    }
+
+    // ---- תקלות ----
+    match /faults/{id} {
+      allow read: if isViewAll()
+        || (isBrig() && inMyBrigade(resource.data))
+        || (isExec() && resource.data.execUid == request.auth.uid);
+
+      // דיווח מהשטח (כולל אנונימי): רק תקלה חדשה, בפורמט הנכון, עם המספר הבא במונה
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['role','division','brigade','type','name','date',
-                                                 'severity','details','photo','status','createdAt','serverTime'])
-        && request.resource.data.status == 'open'
+        && request.resource.data.keys().hasOnly(['seq','role','division','brigade','family','infraName','severity',
+                                                 'details','photo','status','createdAt','serverTime'])
+        && request.resource.data.seq == getAfter(counterPath()).data.n
+        && request.resource.data.status == 'received'
         && request.resource.data.severity in [1, 2, 3]
-        && request.resource.data.name is string    && request.resource.data.name.size() > 0    && request.resource.data.name.size() < 200
-        && request.resource.data.details is string && request.resource.data.details.size() > 0 && request.resource.data.details.size() < 3000
-        && request.resource.data.type is string     && request.resource.data.division is string
-        && request.resource.data.brigade is string  && request.resource.data.brigade.size() < 100
+        && request.resource.data.infraName is string && request.resource.data.infraName.size() > 0 && request.resource.data.infraName.size() < 200
+        && request.resource.data.details is string   && request.resource.data.details.size() > 0   && request.resource.data.details.size() < 3000
+        && request.resource.data.role is string      && request.resource.data.role.size() < 100
+        && request.resource.data.family is string    && request.resource.data.division is string
+        && request.resource.data.brigade is string   && request.resource.data.brigade.size() < 100
         && request.resource.data.createdAt is string
-        && (request.resource.data.photo == null
-            || (request.resource.data.photo is string && request.resource.data.photo.size() < 900000));
+        && photoOk(request.resource.data);
 
-      // רק המנהל הראשי עורך, משנה סטטוס ומוחק
-      allow update, delete: if isSuper();
+      allow update: if photoOk(request.resource.data) && (
+           isFull()
+        || (isBrig() && inMyBrigade(resource.data) && inMyBrigade(request.resource.data)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['targetDate', 'seq', 'createdAt']))
+        || (isExec() && resource.data.execUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'actions', 'blockers', 'history', 'updatedAt', 'updatedBy'])
+            && request.resource.data.status in ['inprogress', 'verify'])
+      );
+
+      allow delete: if isSys();
     }
 
-    // ---- מסד נתונים (טבלת תשתיות) – כל המנהלים קוראים ועורכים ----
-    match /assets/{assetId} {
-      allow read, delete: if isManager();
-      allow create, update: if isManager()
-        && (!('photo' in request.resource.data) || request.resource.data.photo == null
-            || (request.resource.data.photo is string && request.resource.data.photo.size() < 900000));
+    // ---- מאגר תשתיות ----
+    match /infra/{id} {
+      allow read: if isViewAll() || (isBrig() && inMyBrigade(resource.data));
+      allow create: if isFull() || (isBrig() && inMyBrigade(request.resource.data));
+      allow update: if isFull() || (isBrig() && inMyBrigade(resource.data) && inMyBrigade(request.resource.data));
+      allow delete: if isFull();
     }
 
-    // ---- מסד נתוני כשירויות – כל המנהלים קוראים ועורכים ----
-    match /readiness/{rowId} {
-      allow read, delete: if isManager();
-      allow create, update: if isManager()
-        && (!('photo' in request.resource.data) || request.resource.data.photo == null
-            || (request.resource.data.photo is string && request.resource.data.photo.size() < 900000));
+    // ---- מבנה אוגדות וחטיבות (נדרש גם לטופס הדיווח) ----
+    match /structure/{divId} {
+      allow read: if true;
+      allow write: if isSys();
     }
 
     // ---- משתמשי הדשבורד ----
     match /users/{uid} {
-      allow read: if isSuper() || (signedIn() && request.auth.uid == uid);
-
-      // המנהל הראשי מוסיף משתמשים; ההגדרה הראשונית מותרת רק למספר האישי של המנהל הראשי
-      allow create: if isSuper()
+      allow read: if isViewAll() || isBrig() || (signedIn() && request.auth.uid == uid);
+      allow create: if isSys()
         || (isOwner() && request.auth.uid == uid && request.resource.data.role == 'super');
-
-      allow update, delete: if isSuper();
+      allow update, delete: if isSys();
     }
   }
 }

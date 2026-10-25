@@ -102,6 +102,9 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
 .done-box{text-align:center;padding-top:9vh;animation:fadeUp .5s both}
 .done-box .ok{width:76px;height:76px;margin:0 auto 14px;border-radius:50%;background:rgba(93,202,165,.15);display:flex;align-items:center;justify-content:center}
 .done-box .ok svg{width:40px;height:40px;color:#5DCAA5}
+.fnum-box{display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(93,202,165,.1);border:1px solid rgba(127,220,184,.45);border-radius:14px;padding:12px;margin:0 auto 18px;max-width:280px}
+.fnum-box span{font-size:12px;color:var(--muted)}
+.fnum-box b{font-size:26px;font-weight:800;color:#7fdcb8;direction:ltr;letter-spacing:.02em}
 .done-box h2{font-size:24px;font-weight:500;margin-bottom:10px}
 .done-box .sum{color:var(--muted);font-size:15px;line-height:1.9;margin-bottom:30px}
 
@@ -133,12 +136,11 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
 
   <div class="f"><label class="l" for="division">2. גזרה <b>*</b></label>
     <select class="in" id="division"><option value="">בחר גזרה</option>
-      <option>אוגדה 91</option><option>אוגדה 210</option><option>אוגדה 146</option><option>אחר</option></select>
+      <option>אוגדה 91</option><option>אוגדה 210</option><option>אוגדה 146</option></select>
     <div class="err" data-for="division"></div></div>
 
   <div class="f"><label class="l" for="brigade">3. חטיבה <b>*</b></label>
-    <input class="in" id="brigade" list="brigadeList" placeholder="שם או מספר החטיבה" autocomplete="off">
-    <datalist id="brigadeList"></datalist>
+    <div id="briWrap"><input class="in" id="brigade" placeholder="שם או מספר החטיבה" autocomplete="off"></div>
     <div class="err" data-for="brigade"></div></div>
 
   <div class="f"><label class="l" for="type">4. סוג התשתית <b>*</b></label>
@@ -151,11 +153,8 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
     <input class="in" id="name" placeholder="שם המוצב / הציר / המתקן" autocomplete="off">
     <div class="err" data-for="name"></div></div>
 
-  <div class="f"><label class="l" for="date">6. תאריך דיווח <b>*</b></label>
-    <input class="in" id="date" type="date">
-    <div class="err" data-for="date"></div></div>
 
-  <div class="f"><span class="l">7. סיווג התקלה <b>*</b></span>
+  <div class="f"><span class="l">6. סיווג התקלה <b>*</b></span>
     <div class="sev" id="sev" role="radiogroup" aria-label="סיווג התקלה">
       <label style="--c:var(--crit)"><input type="radio" name="sev" value="3" class="vh"><span class="dot" style="background:var(--crit)"></span>
         <span><span class="nm" style="color:#ff8a80">קריטית</span> – פגיעה ברציפות התפקוד או בבטיחות</span></label>
@@ -166,11 +165,11 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
     </div>
     <div class="err" data-for="sev"></div></div>
 
-  <div class="f"><label class="l" for="details">8. פירוט התקלה <b>*</b></label>
+  <div class="f"><label class="l" for="details">7. פירוט התקלה <b>*</b></label>
     <textarea class="in" id="details" placeholder="תאר בקצרה את התקלה, מה נפגע ומה המשמעות שלה"></textarea>
     <div class="err" data-for="details"></div></div>
 
-  <div class="f"><span class="l">9. תמונת התקלה</span>
+  <div class="f"><span class="l">8. תמונת התקלה</span>
     <input type="file" id="fileCam" accept="image/*" capture="environment" class="vh" tabindex="-1">
     <input type="file" id="fileGal" accept="image/*" class="vh" tabindex="-1">
     <label class="photo" id="photo" for="sheetToggle" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg><div style="margin-top:6px">הוסף תמונה</div></label></div>
@@ -200,7 +199,7 @@ textarea.in{height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
 </div>
 
 <script>
-const LS_BRIGADES='nc_my_brigades', SPLASH_MS=2000;
+const SPLASH_MS=2000;
 const fbReady = new Promise((res,rej)=>{ window.__fbResolve=res; window.__fbReject=rej; setTimeout(()=>rej(new Error('timeout')),20000); });
 fbReady.catch(()=>{});
 const withTimeout = (p,ms) => Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
@@ -215,16 +214,34 @@ let severity=null, photoData=null;
     if(p<1)requestAnimationFrame(step);else{$('#splash').classList.add('done');setTimeout(()=>$('#splash').remove(),600);}};
   requestAnimationFrame(step);})();
 
-/* brigade suggestions from earlier reports on this device */
-function fillBrigades(){
-  let names=[];try{names=JSON.parse(localStorage.getItem(LS_BRIGADES))||[];}catch(_){}
-  $('#brigadeList').innerHTML=names.map(n=>`<option value="${esc(n)}">`).join('');
+/* divisions and brigades come from the structure table (managed in the dashboard) */
+let STRUCT=[];
+const LS_LAST='nc_last_unit';
+function renderDivs(){
+  if(!STRUCT.length) return;
+  const cur=$('#division').value;
+  $('#division').innerHTML='<option value="">בחר גזרה</option>'+STRUCT.map(d=>`<option ${d.name===cur?'selected':''}>${esc(d.name)}</option>`).join('');
 }
-fillBrigades();
+function renderBri(keep){
+  const d=STRUCT.find(x=>x.name===$('#division').value), list=d?.brigades||[];
+  const old=keep!==undefined?keep:($('#brigade')?.value||'');
+  $('#briWrap').innerHTML = list.length
+    ? `<select class="in" id="brigade"><option value="">בחר חטיבה</option>${list.map(b=>`<option ${b===old?'selected':''}>${esc(b)}</option>`).join('')}</select>`
+    : `<input class="in" id="brigade" placeholder="${$('#division').value?'שם או מספר החטיבה':'בחר קודם גזרה'}" autocomplete="off" value="${esc(old)}">`;
+  $('#brigade').addEventListener('input',()=>setErr('brigade',''));
+  $('#brigade').addEventListener('change',()=>setErr('brigade',''));
+}
+$('#division').addEventListener('change',()=>{ renderBri(''); setErr('division',''); });
+try{ const l=JSON.parse(localStorage.getItem(LS_LAST)||'null'); if(l){ $('#division').value=l.division||''; renderBri(l.brigade||''); } }catch(_){}
+fbReady.then(api=>api.structure()).then(list=>{
+  STRUCT=list||[]; if(!STRUCT.length) return;
+  let l=null; try{ l=JSON.parse(localStorage.getItem(LS_LAST)||'null'); }catch(_){}
+  renderDivs(); if(l && STRUCT.some(d=>d.name===l.division)) $('#division').value=l.division;
+  renderBri(l?.brigade||'');
+}).catch(()=>{});
 
-/* defaults */
-const today=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
-$('#date').value=today();
+/* fault number shown to the reporter */
+const fnum=(seq,iso)=>`NC-${(iso||new Date().toISOString()).slice(0,4)}-${String(seq).padStart(4,'0')}`;
 
 /* severity */
 function syncSev(){
@@ -267,28 +284,25 @@ function setErr(id,msg){
   const el=id==='saveErr'?$('#saveErr'):document.querySelector(`.err[data-for="${id}"]`);if(el)el.textContent=msg;
   const inp=document.getElementById(id);if(inp&&inp.classList.contains('in'))inp.classList.toggle('bad',!!msg);
 }
-['role','division','brigade','type','name','date','details'].forEach(id=>$('#'+id).addEventListener('input',()=>setErr(id,'')));
+['role','division','type','name','details'].forEach(id=>$('#'+id).addEventListener('input',()=>setErr(id,'')));
 
-let pendingId=null;
 $('#form').addEventListener('submit',async e=>{
   e.preventDefault();setErr('saveErr','');
   const v=id=>$('#'+id).value.trim();
-  const req={role:'הזן את תפקיד המדווח',division:'בחר גזרה',brigade:'הזן חטיבה',type:'בחר סוג תשתית',name:'הזן את שם התשתית',date:'בחר תאריך',details:'תאר את התקלה'};
+  const req={role:'הזן את תפקיד המדווח',division:'בחר גזרה',brigade:'בחר חטיבה',type:'בחר סוג תשתית',name:'הזן את שם התשתית',details:'תאר את התקלה'};
   let first=null;
   for(const id in req){if(!v(id)){setErr(id,req[id]);first=first||id;}}
   if(!severity){setErr('sev','בחר סיווג תקלה');first=first||'sev';}
   if(first){(document.getElementById(first)||$('#sev')).scrollIntoView({behavior:'smooth',block:'center'});return;}
 
   if(!navigator.onLine){ setErr('saveErr','אין חיבור לאינטרנט. התחבר ונסה שוב, הטופס נשמר על המסך.'); return; }
-  if(!pendingId) pendingId = Date.now().toString(36)+Math.random().toString(36).slice(2,8);   // same id on retry = no duplicates
-  const report={role:v('role'),division:v('division'),brigade:v('brigade').replace(/\s+/g,' '),type:v('type'),name:v('name'),date:v('date'),
-    severity,details:v('details'),photo:photoData,status:'open',createdAt:new Date().toISOString()};
+  const report={role:v('role'),division:v('division'),brigade:v('brigade').replace(/\s+/g,' '),family:v('type'),infraName:v('name').replace(/\s+/g,' '),
+    severity,details:v('details'),photo:photoData,status:'received',createdAt:new Date().toISOString()};
   const btn=$('#send'), label=btn.innerHTML; btn.disabled=true; btn.textContent='שולח…';
   try{
-    const send = await withTimeout(fbReady,15000);
-    await withTimeout(send(pendingId, report), 25000);
-    pendingId=null;
-    try{ const n=new Set(JSON.parse(localStorage.getItem(LS_BRIGADES)||'[]')); n.add(report.brigade); localStorage.setItem(LS_BRIGADES,JSON.stringify([...n].slice(-50))); }catch(_){}
+    const api = await withTimeout(fbReady,15000);
+    report.seq = await withTimeout(api.send(report), 25000);
+    try{ localStorage.setItem(LS_LAST,JSON.stringify({division:report.division,brigade:report.brigade})); }catch(_){}
     showDone(report);
   }catch(err){
     const c=err?.code||err?.message||'';
@@ -305,16 +319,16 @@ function showDone(r,note){
   $('#done').innerHTML=`<div class="done-box">
     <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg></div>
     <h2>הדיווח נשלח</h2>
-    <div class="sum">${esc(r.type)} · ${esc(r.name)}<br>${esc(r.division)} · ${esc(r.brigade||'')} · תקלה <b style="color:${{3:'#ff8a80',2:'#f5b06a',1:'#f1d36a'}[r.severity]};font-weight:500">${SEV_NAME[r.severity]}</b>
+    <div class="fnum-box"><span>מספר התקלה שלך</span><b>${fnum(r.seq,r.createdAt)}</b><span>שמור את המספר לבירורים</span></div>
+    <div class="sum">${esc(r.family)} · ${esc(r.infraName)}<br>${esc(r.division)} · ${esc(r.brigade||'')} · תקלה <b style="color:${{3:'#ff8a80',2:'#f5b06a',1:'#f1d36a'}[r.severity]};font-weight:500">${SEV_NAME[r.severity]}</b>
     ${note?`<br><span style="color:var(--danger);font-size:13px">${esc(note)}</span>`:''}</div>
     <button class="go" id="again">דיווח חדש</button></div>`;
   $('#done').hidden=false;window.scrollTo(0,0);
   $('#again').onclick=resetForm;
 }
 function resetForm(){
-  pendingId=null;
   const keepRole=$('#role').value,keepDiv=$('#division').value,keepBri=$('#brigade').value;
-  $('#form').reset();$('#role').value=keepRole;$('#division').value=keepDiv;$('#brigade').value=keepBri;fillBrigades();$('#date').value=today();
+  $('#form').reset();$('#role').value=keepRole;$('#division').value=keepDiv;renderBri(keepBri);
   severity=null;photoData=null;renderPhoto();
   syncSev();
   $('#done').hidden=true;$('#form').hidden=false;window.scrollTo(0,0);
@@ -335,9 +349,18 @@ try{
   appId: "1:1000938553580:web:f8b84a4b2175daf42625c9"
 });
   const auth = A.getAuth(app), db = S.getFirestore(app);
-  window.__fbResolve(async (id, data) => {
-    if(!auth.currentUser) await A.signInAnonymously(auth);
-    await S.setDoc(S.doc(db,'reports',id), { ...data, serverTime:S.serverTimestamp() });
+  window.__fbResolve({
+    structure: async () => (await S.getDocs(S.collection(db,'structure'))).docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0)),
+    send: async data => {
+      if(!auth.currentUser) await A.signInAnonymously(auth);
+      const cRef=S.doc(db,'meta','counter'), fRef=S.doc(S.collection(db,'faults'));
+      return await S.runTransaction(db, async tx => {
+        const c=await tx.get(cRef), n=(c.exists()?c.data().n:0)+1;
+        tx.set(cRef,{ n, lastId:fRef.id });
+        tx.set(fRef,{ ...data, seq:n, serverTime:S.serverTimestamp() });
+        return n;
+      });
+    }
   });
 }catch(e){ console.error('Firebase failed to load', e); window.__fbReject && window.__fbReject(e); }
 </script>
