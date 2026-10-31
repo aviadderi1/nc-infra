@@ -634,6 +634,51 @@ table.db.fl tbody tr,table.db.ir tbody tr{cursor:pointer}
 .chip .emb-img,.chip .emb-img.has{width:26px;height:26px}
 @media (max-height:700px) and (min-aspect-ratio:1/1){ .emb-img{width:44px;height:44px} .emb-img.has{width:38px} .emb.sm .emb-img{width:36px;height:36px} .emb{padding:2px 6px;gap:1px} }
 
+/* ================= Rain alerts ================= */
+.rain-btn{position:relative;color:#7fd3dc;border-color:rgba(127,211,220,.5)}
+.rain-btn.red{color:#ff8a80;border-color:rgba(255,138,128,.6);animation:pulse 1.6s ease-in-out infinite}
+.rain-btn .n{position:absolute;top:-7px;left:-7px;background:#e74c3c;color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.rain-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;align-self:center;background:rgba(245,176,106,.12);border:1px solid rgba(245,176,106,.6);color:#ffd9b0;
+  border-radius:12px;padding:7px 16px;font-size:clamp(12px,1.7dvh,14.5px);flex:none;max-width:100%}
+.rain-bar b{font-weight:500;color:#f5b06a}
+.rain-bar.red{background:rgba(231,76,60,.14);border-color:rgba(255,138,128,.7);color:#ffd6d0}
+.rain-bar.red b{color:#ff8a80}
+.rain-bar .pulse{width:10px;height:10px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite}
+.rain-bar .rb-go{color:var(--accent2);text-decoration:underline;text-underline-offset:3px}
+.rain-modal{max-width:1180px!important;width:96vw}
+.rain-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:14px;min-height:0}
+#rainMap{height:min(68dvh,640px);border-radius:12px;border:1px solid var(--line);background:#16241c}
+#rainSide{max-height:min(68dvh,640px);overflow:auto;padding-inline-end:4px}
+.rain-meta{font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.7}
+.rain-list{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.rs{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;align-items:center;gap:8px;background:transparent;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;text-align:right}
+.rs.on{border-color:rgba(232,198,90,.6);background:rgba(232,198,90,.07)}
+.rs .dot{width:10px;height:10px;border-radius:50%}
+.rs .mm{font-weight:800;font-variant-numeric:tabular-nums}
+.tag-al{font-size:11px;color:#ff8a80;border:1px solid rgba(255,138,128,.5);border-radius:999px;padding:0 7px}
+.rain-det h4{color:var(--accent2);font-weight:500;font-size:15px;margin:4px 0 8px}
+.rain-nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center;margin-bottom:10px}
+.rain-nums span{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px}
+.rain-nums b{font-size:24px;font-weight:800;color:var(--text)}
+.rain-al{background:rgba(245,176,106,.1);border:1px solid rgba(245,176,106,.55);border-radius:10px;padding:8px 12px;font-size:13px;margin-bottom:8px}
+.rain-al.red{background:rgba(231,76,60,.12);border-color:rgba(255,138,128,.6)}
+.ri-head{font-size:13px;color:var(--soft);margin:8px 0 4px}
+.ri-list{display:flex;flex-direction:column;gap:3px}
+.ri{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:8px;align-items:center;background:transparent;border:none;border-bottom:1px solid var(--line);padding:6px 4px;color:var(--soft);font-size:13.5px;text-align:right}
+.ri.key{color:var(--text)}
+.ri .rf{font-size:12px;color:var(--muted)}
+.ri.key .rf{color:#f5b06a}
+.ri .rf b{color:#ff8a80;font-weight:500}
+.ri:hover{background:rgba(255,255,255,.04)}
+.rain-tools{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px;color:var(--muted)}
+.sg-list{font-size:12.5px;line-height:2;margin:10px 0;color:var(--muted)}
+.sg-list b{color:var(--soft);font-weight:500}
+.sg-list .ok{color:#7fdcb8}
+.leaflet-container{font-family:inherit}
+.leaflet-tooltip{direction:rtl;font-family:inherit}
+@media (max-width:820px){ .rain-grid{grid-template-columns:1fr} #rainMap{height:42dvh} #rainSide{max-height:none} }
+@media (max-width:1500px){.who{display:none}}
+
 #vDash{align-items:stretch;overflow:auto}
 @media (max-width:1399px){body:has(#newAlert:not([hidden]):not(.off)) #vDash{padding-top:calc(1.2dvh + 54px)}}
 #vDash .lb{max-width:none}
@@ -709,6 +754,10 @@ table.db.fl tbody tr,table.db.ir tbody tr{cursor:pointer}
     </div>
     <div class="tb-actions">
       <span class="who" id="who"></span>
+      <button class="btn-ghost rain-btn" id="btnRain" hidden aria-label="התראות משקעים" title="התראות משקעים">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 7.5a4 4 0 0 1-1 7.5"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg>
+        <span class="n" id="rainCount">0</span>
+      </button>
       <button class="btn-ghost bell" id="btnBell" aria-label="תקלות חדשות">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         <span class="n" id="bellCount" hidden>0</span>
@@ -743,6 +792,7 @@ table.db.fl tbody tr,table.db.ir tbody tr{cursor:pointer}
   <main class="content view" id="vDash">
     <div class="emblems" id="emblems" aria-label="סינון לפי יחידה"></div>
     <div class="scope-line" id="scopeLine"></div>
+    <button class="rain-bar" id="rainBar" hidden></button>
     <div class="kpis" id="kpis"></div>
     <div class="chips-row" id="chipsRow"></div>
     <div class="fams" id="fams"></div>
@@ -888,6 +938,7 @@ table.db.fl tbody tr,table.db.ir tbody tr{cursor:pointer}
         <input class="in" id="newDiv" placeholder="שם אוגדה חדשה, לדוגמה: אוגדה 91" autocomplete="off">
         <button type="submit" class="btn-ghost">הוסף אוגדה</button>
         <button type="button" class="btn-ghost" id="loadDefault">טען מבנה ברירת מחדל</button>
+        <button type="button" class="btn-ghost" id="openSectors">גזרות למעקב משקעים</button>
       </form>
       <div class="hint">המבנה קובע את רשימות האוגדה והחטיבה בטפסים ואת תחום הצפייה של קציני ההנדסה. לחץ על סמל כדי להעלות תמונה (PNG עם רקע שקוף עדיף).</div>
       <input type="file" id="embFile" accept="image/*" hidden>
@@ -909,6 +960,14 @@ table.db.fl tbody tr,table.db.ir tbody tr{cursor:pointer}
       <button class="btn-ghost" id="fcClose" aria-label="סגור">✕</button></div>
     </div>
     <div id="fcBody"></div>
+  </div>
+</div>
+
+<!-- Rain alerts map -->
+<div class="rep-back" id="rainBack">
+  <div class="rep fc rain-modal" role="dialog" aria-modal="true" aria-labelledby="rainTitle">
+    <div class="rep-head"><h3 id="rainTitle">מעקב משקעים</h3><button class="btn-ghost" id="rainClose" aria-label="סגור">✕</button></div>
+    <div class="rain-grid"><div id="rainMap"></div><div id="rainSide"></div></div>
   </div>
 </div>
 
@@ -1145,7 +1204,8 @@ function renderDashboard(){
   const pend=INSP.filter(r=>r.status==='pending' && inDF(r) && canApprove(r)).length;
   const c=(preset,lbl,n,col)=>`<button class="mini" data-preset="${preset}"><span>${lbl}</span><b style="color:${n?col:'#7fdcb8'}">${n}</b></button>`;
   $('#chipsRow').innerHTML = c('unassigned','ללא שיוך גורם מטפל',una.length,'#f5b06a') + c('unmatched','ממתינים לשיוך תשתית',unm.length,'#e8c65a')
-    + c('overdue','חרגו ממועד יעד',od.length,'#ff8a80') + (isExec()?'':c('pendingInsp','ביקורות ממתינות לאישור',pend,'#7fd3dc'));
+    + c('overdue','חרגו ממועד יעד',od.length,'#ff8a80') + (isExec()?'':c('pendingInsp','ביקורות ממתינות לאישור',pend,'#7fd3dc'))
+    + (isExec()?'':(()=>{ const ss=SECTORS.filter(inDF), mx=ss.reduce((m,s)=>Math.max(m,sectorRain(s)?.last24||0),0); return `<button class="mini" data-preset="rain"><span>משקעים 24 ש׳</span><b style="color:${ss.length&&RAIN?rainColor(mx):'var(--muted)'}">${ss.length&&RAIN?Math.round(mx)+' מ״מ':'—'}</b></button>`; })());
   $('#fams').innerHTML = FAMILIES.map(fm=>{
     const o=open.filter(f=>f.family===fm.key), cc=o.filter(f=>f.severity===3).length, t=o.length||1;
     const seg=[3,2,1].map(s=>{ const n=o.filter(f=>f.severity===s).length; return n?`<i style="width:${n/t*100}%;background:${SEV[s].c}"></i>`:''; }).join('');
@@ -1154,9 +1214,11 @@ function renderDashboard(){
   }).join('');
   renderInspPanel();
   renderLeaderboard();
+  renderRainUI();
 }
 function onPreset(p){
   if(p==='pendingInsp'){ PF.status='pending'; showView('vPlan'); return; }
+  if(p==='rain'){ openRain(); return; }
   openList(p==='open'?{}:p==='inprogress'?{status:'inprogress'}:p==='closedMonth'?{preset:'closedMonth'}:{preset:p});
 }
 $('#kpis').addEventListener('click',e=>{ const b=e.target.closest('[data-preset]'); if(b) onPreset(b.dataset.preset); });
@@ -1534,12 +1596,14 @@ function startData(){
       err=>toast('לא ניתן לקרוא נתונים. ייתכן שצריך לעדכן את חוקי האבטחה ב-Firebase. '+authMsg(err))));
     sub('infra', v=>INFRA=v, ()=>{ if($('#ifBack').classList.contains('show')) renderIF(); if($('#fcBack').classList.contains('show') && !fcDirty) renderFC(); });
     sub('inspPlans', v=>PLANS=v);
+    sub('sectors', v=>{ const first=!SECTORS.length; SECTORS=v; if(first&&v.length) startRain(); }, ()=>{ if($('#rainBack').classList.contains('show')){ drawRain(); renderRainSide(); } });
+    sub('rainAlerts', v=>RAINAL=v, ()=>{ renderRainUI(); if($('#rainBack').classList.contains('show')){ drawRain(); renderRainSide(); } });
     sub('inspections', v=>INSP=v.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')), ()=>{ if($('#irvBack').classList.contains('show')) renderIRV(); });
     unsubs.push(FB.onSnapshot(col('users'), snap=>{ USERS=snap.docs.map(d=>({ ...d.data(), uid:d.id })); if(!$('#vAdmin').hidden) renderAdmin(); }, ()=>{}));
   }
   unsubs.push(FB.onSnapshot(col('structure'), snap=>{ STRUCT=snap.docs.map(d=>({ ...d.data(), id:d.id })).sort((a,b)=>(a.order||0)-(b.order||0)); renderView(); }, ()=>{}));
 }
-function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; FAULTS=[]; INFRA=[]; USERS=[]; STRUCT=[]; PLANS=[]; INSP=[]; faultsLoaded=false; }
+function stopData(){ unsubs.forEach(u=>{ try{u();}catch(e){} }); unsubs=[]; FAULTS=[]; INFRA=[]; USERS=[]; STRUCT=[]; PLANS=[]; INSP=[]; SECTORS=[]; RAINAL=[]; clearInterval(rainTimer); faultsLoaded=false; }
 
 /* ================= Excel export ================= */
 /* spec: {title, sheet, fileBase, heads, widths, dateCols:[col#], centerCols:[col#], wrapCols:[col#], photoCol, note,
@@ -1807,6 +1871,215 @@ $('#irvClose').addEventListener('click',closeIRV);
 $('#irvBack').addEventListener('click',e=>{ if(e.target.id==='irvBack') closeIRV(); });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if($('#irvBack').classList.contains('show')) closeIRV(); else if($('#plBack').classList.contains('show')) closePL(); });
 
+/* ================= Rain alerts (התראות משקעים) ================= */
+const RAIN_WARN = 30, RAIN_RED = 50;                    // מ"מ ב-24 שעות
+const RAIN_GRID = { lat0:32.45, lat1:33.45, lng0:34.95, lng1:35.95, step:0.1 };   // רשת קבועה על כל הצפון – לא נשלח מידע על הגזרות
+const LEAFLET = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
+let SECTORS=[], RAINAL=[], RAIN=null, rainTimer=null;
+const rainKey = 'nc_rain_cache';
+const ptIn = (p, poly) => { let c=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const a=poly[i], b=poly[j];
+  if(((a.lat>p.lat)!==(b.lat>p.lat)) && (p.lng < (b.lng-a.lng)*(p.lat-a.lat)/(b.lat-a.lat)+a.lng)) c=!c; } return c; };
+const centroid = poly => ({ lat:poly.reduce((s,p)=>s+p.lat,0)/poly.length, lng:poly.reduce((s,p)=>s+p.lng,0)/poly.length });
+const sectorOf = (d,b) => SECTORS.find(s=>s.division===d && s.brigade===b);
+const mmTxt = v => `${Math.round(v)} מ״מ`;
+const rainColor = mm => mm>=RAIN_RED ? '#ff8a80' : mm>=RAIN_WARN ? '#f5b06a' : '#7fd3dc';
+
+async function fetchRain(force){
+  if(!force && RAIN && Date.now()-RAIN.at < 25*60000) return RAIN;
+  if(!force){ try{ const c=JSON.parse(localStorage.getItem(rainKey)||'null'); if(c && Date.now()-c.at < 25*60000){ RAIN=c; return RAIN; } }catch(_){} }
+  const pts=[]; for(let la=RAIN_GRID.lat0; la<=RAIN_GRID.lat1+1e-9; la+=RAIN_GRID.step) for(let lo=RAIN_GRID.lng0; lo<=RAIN_GRID.lng1+1e-9; lo+=RAIN_GRID.step) pts.push({ lat:+la.toFixed(2), lng:+lo.toFixed(2) });
+  const now=Date.now()/1000, out=[];
+  for(let i=0;i<pts.length;i+=60){
+    const ch=pts.slice(i,i+60);
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${ch.map(p=>p.lat).join(',')}&longitude=${ch.map(p=>p.lng).join(',')}&hourly=precipitation&past_days=2&forecast_days=1&timeformat=unixtime&timezone=GMT`;
+    const r=await fetch(url); if(!r.ok) throw new Error('rain '+r.status);
+    let js=await r.json(); if(!Array.isArray(js)) js=[js];
+    js.forEach((d,k)=>{
+      const t=d.hourly?.time||[], p=d.hourly?.precipitation||[];
+      const idx=t.map((x,n)=>n).filter(n=>t[n]<=now);           // שעות שכבר עברו
+      let last24=0, max24=0, maxAt=0;
+      idx.forEach((n,m)=>{ if(m<24) return; let s=0; for(let q=m-23;q<=m;q++) s+=p[idx[q]]||0; if(s>max24){ max24=s; maxAt=t[n]; } });
+      idx.slice(-24).forEach(n=>last24+=p[n]||0);
+      if(idx.length<25){ max24=last24; maxAt=t[idx[idx.length-1]]||now; }
+      out.push({ ...ch[k], last24:+last24.toFixed(1), max24:+max24.toFixed(1), maxAt });
+    });
+  }
+  RAIN={ at:Date.now(), pts:out };
+  try{ localStorage.setItem(rainKey, JSON.stringify(RAIN)); }catch(_){}
+  return RAIN;
+}
+function sectorRain(s){
+  if(!RAIN || !s?.pts?.length) return null;
+  let inside=RAIN.pts.filter(p=>ptIn(p,s.pts));
+  if(!inside.length){ const c=centroid(s.pts); inside=[RAIN.pts.reduce((a,b)=>((a.lat-c.lat)**2+(a.lng-c.lng)**2) < ((b.lat-c.lat)**2+(b.lng-c.lng)**2) ? a : b)]; }
+  const top=inside.reduce((a,b)=>b.max24>a.max24?b:a);
+  return { mm:top.max24, last24:Math.max(...inside.map(p=>p.last24)), peakAt:new Date(top.maxAt*1000).toISOString(), n:inside.length };
+}
+async function checkRain(force){
+  if(!current || isExec() || !SECTORS.length) return;
+  try{ await fetchRain(force); }catch(e){ console.warn(e); if(force) toast('לא ניתן לקבל נתוני משקעים כרגע'); return; }
+  for(const s of SECTORS){
+    const r=sectorRain(s); if(!r || r.mm<RAIN_WARN) continue;
+    const open=RAINAL.find(a=>a.sectorId===s.id && !a.ack && Date.now()-new Date(a.createdAt).getTime() < 72*3600000);
+    try{
+      if(open){ if(r.mm > (open.mm||0)+0.9) await FB.updateDoc(FB.doc(FB.db,'rainAlerts',open.id),{ mm:r.mm, last24:r.last24, peakAt:r.peakAt, updatedAt:new Date().toISOString() }); }
+      else {
+        const recentAck=RAINAL.find(a=>a.sectorId===s.id && a.ack && a.peakAt===r.peakAt);
+        if(recentAck) continue;
+        await FB.setDoc(FB.doc(FB.db,'rainAlerts',`${s.id}_${r.peakAt.slice(0,13)}`),{ sectorId:s.id, division:s.division, brigade:s.brigade, mm:r.mm, last24:r.last24, peakAt:r.peakAt,
+          createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), ack:false });
+      }
+    }catch(e){ console.warn('rain alert', e); }
+  }
+  renderRainUI();
+}
+function startRain(){
+  clearInterval(rainTimer); if(isExec()) return;
+  setTimeout(()=>checkRain(false), 1500);
+  rainTimer=setInterval(()=>checkRain(false), 30*60000);
+}
+const activeRain = () => RAINAL.filter(a=>!a.ack);
+function renderRainUI(){
+  if(!current) return;
+  const all=activeRain(), mine=all.filter(inDF);
+  const b=$('#btnRain'); b.hidden=!all.length; $('#rainCount').textContent=all.length;
+  b.classList.toggle('red', all.some(a=>a.mm>=RAIN_RED));
+  const bar=$('#rainBar'); if(!bar) return;
+  if(isExec()){ bar.hidden=true; return; }
+  if(mine.length){
+    const top=mine.slice().sort((x,y)=>y.mm-x.mm)[0];
+    bar.hidden=false; bar.classList.toggle('red', top.mm>=RAIN_RED);
+    bar.innerHTML=`<span class="pulse"></span><b>התראת משקעים · ${mine.length===1?'גזרה אחת':mine.length+' גזרות'} בסיכון</b><span>${mine.map(a=>`${esc(briLabel(a.division,a.brigade))} ${mmTxt(a.mm)}`).slice(0,3).join(' · ')}${mine.length>3?' …':''}</span><span class="rb-go">למפה ←</span>`;
+  } else bar.hidden=true;
+}
+$('#btnRain').addEventListener('click',()=>openRain());
+$('#rainBar').addEventListener('click',()=>openRain());
+
+/* ---- rain modal: map + infra list ---- */
+let rmap=null, rlayers=null, rainMode='view', rainSel=null, draft=[], editKey={d:'',b:''};
+async function ensureLeaflet(){
+  if(window.L) return;
+  if(!document.getElementById('leafletCss')){ const l=document.createElement('link'); l.id='leafletCss'; l.rel='stylesheet'; l.href=LEAFLET+'leaflet.css'; document.head.appendChild(l); }
+  await loadScript(LEAFLET+'leaflet.js');
+}
+async function openRain(sel){
+  rainMode='view'; rainSel=sel||null;
+  $('#rainBack').classList.add('show');
+  $('#rainSide').innerHTML='<div class="hint">טוען מפה…</div>';
+  try{ await ensureLeaflet(); }catch(e){ $('#rainSide').innerHTML='<div class="err">לא ניתן לטעון את המפה. בדוק חיבור לאינטרנט</div>'; return; }
+  if(!rmap){
+    rmap=L.map('rainMap',{ zoomControl:true, attributionControl:true }).setView([33.05,35.45],9);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom:16, attribution:'© OpenStreetMap' }).addTo(rmap);
+    rlayers=L.layerGroup().addTo(rmap);
+    rmap.on('click',e=>{ if(rainMode!=='edit') return; draft.push({ lat:+e.latlng.lat.toFixed(5), lng:+e.latlng.lng.toFixed(5) }); drawRain(); renderRainSide(); });
+  }
+  setTimeout(()=>{ rmap.invalidateSize(); drawRain(true); },60);
+  renderRainSide();
+  if(!RAIN) fetchRain(false).then(()=>{ drawRain(); renderRainSide(); }).catch(()=>{});
+}
+function closeRain(){ $('#rainBack').classList.remove('show'); rainMode='view'; draft=[]; }
+const sectorsInScope = () => SECTORS.filter(inDF);
+function drawRain(fit){
+  if(!rmap) return; rlayers.clearLayers();
+  const list=sectorsInScope(), bounds=[];
+  list.forEach(s=>{
+    if(rainMode==='edit' && s.division===editKey.d && s.brigade===editKey.b) return;
+    const r=sectorRain(s), al=activeRain().find(a=>a.sectorId===s.id), mm=al?al.mm:(r?.mm||0);
+    const col = rainMode==='edit' ? '#9aa89d' : al ? rainColor(al.mm) : '#7fd3dc';
+    const pg=L.polygon(s.pts.map(p=>[p.lat,p.lng]),{ color:col, weight: rainSel===s.id?3:2, fillOpacity: al?0.28:0.08, dashArray: al?null:'4 4' }).addTo(rlayers);
+    pg.bindTooltip(`${briLabel(s.division,s.brigade)}${r?` · ${mmTxt(Math.max(mm,r.last24))}`:''}`,{ sticky:true, direction:'top' });
+    pg.on('click',()=>{ if(rainMode==='view'){ rainSel=s.id; drawRain(); renderRainSide(); } });
+    s.pts.forEach(p=>bounds.push([p.lat,p.lng]));
+  });
+  if(rainMode==='edit' && draft.length){
+    L.polygon(draft.map(p=>[p.lat,p.lng]),{ color:'#e8c65a', weight:2, fillOpacity:.15 }).addTo(rlayers);
+    draft.forEach((p,i)=>L.circleMarker([p.lat,p.lng],{ radius:i===draft.length-1?6:4, color:'#e8c65a', fillOpacity:1 }).addTo(rlayers));
+  }
+  const sel=SECTORS.find(s=>s.id===rainSel);
+  if(sel && rainMode==='view') rmap.fitBounds(sel.pts.map(p=>[p.lat,p.lng]),{ padding:[30,30], maxZoom:12 });
+  else if(fit && bounds.length) rmap.fitBounds(bounds,{ padding:[20,20], maxZoom:11 });
+}
+function infraRows(d,b){
+  const pri=f=>f==='ציר'?0:f==='מכשול'?1:2;
+  const list=INFRA.filter(i=>i.division===d && i.brigade===b).sort((x,y)=>pri(x.family)-pri(y.family) || (x.name||'').localeCompare(y.name||'','he'));
+  const key=list.filter(i=>pri(i.family)<2).length;
+  return { list, key, html: list.length ? list.map(i=>{ const op=infraFaults(i.id).filter(isOpen).length;
+    return `<button class="ri ${pri(i.family)<2?'key':''}" data-openif="${esc(i.id)}"><span class="num-cell">${esc(i.code)}</span><span>${esc(i.name)}</span><span class="rf">${esc(famName(i.family))}${op?` · <b>${op} פתוחות</b>`:''}</span></button>`; }).join('')
+    : '<div class="hint" style="margin:0">אין תשתיות במאגר לחטיבה הזו</div>' };
+}
+function renderRainSide(){
+  const box=$('#rainSide'), canEditS=isCmd()||isDiv();
+  $('#rainTitle').textContent = rainMode==='edit' ? 'עריכת גזרות למעקב משקעים' : 'מעקב משקעים לפי גזרות';
+  if(rainMode==='edit'){
+    const divs=isDiv()?[current.division]:divisions();
+    if(!editKey.d) editKey.d=DF.div||divs[0]||'';
+    const has=sectorOf(editKey.d,editKey.b);
+    box.innerHTML=`
+      <div class="fc-grid two"><div class="fc-f"><label>אוגדה</label>${isDiv()?`<div class="ro">${esc(editKey.d)}</div>`:`<select class="in" id="sgDiv">${opts(divs,editKey.d)}</select>`}</div>
+        <div class="fc-f"><label>חטיבה</label><select class="in" id="sgBri">${opts(brigadesOf(editKey.d),editKey.b,'בחר חטיבה')}</select></div></div>
+      <div class="hint">${editKey.b?`לחץ על המפה כדי לסמן את פינות הגזרה (לפחות 3 נקודות). ${has?'לגזרה כבר יש פוליגון – שמירה תחליף אותו.':''}`:'בחר חטיבה כדי לצייר את הגזרה שלה'}</div>
+      <div class="rain-tools"><span>${draft.length} נקודות</span><button class="btn-ghost sm" id="sgUndo">בטל נקודה</button><button class="btn-ghost sm" id="sgClear">נקה</button></div>
+      <div class="fc-actions"><button class="btn-primary" id="sgSave">שמור גזרה</button>${has?'<button class="btn-ghost btn-del" id="sgDel">מחק גזרה</button>':''}<button class="btn-ghost" id="sgBack">סיום</button></div>
+      <div class="err" id="sgErr"></div>
+      <div class="sg-list">${divs.map(d=>`<div><b>${esc(d)}</b> ${brigadesOf(d).map(b=>`<span class="${sectorOf(d,b)?'ok':'no'}">${esc(b)} ${sectorOf(d,b)?'✓':'—'}</span>`).join(' ')}</div>`).join('')}</div>
+      <div class="hint">⚠ הגזרות נשמרות בענן ומוצגות רק למשתמשים מורשים. מומלץ לצייר בקירוב גס, ולקבל אישור קצין אבטחת מידע.</div>`;
+    return;
+  }
+  const sec=sectorsInScope();
+  const rows=sec.map(s=>{ const r=sectorRain(s), al=activeRain().find(a=>a.sectorId===s.id); return { s, r, al, mm: al?al.mm:(r?r.mm:null), last:r?r.last24:null }; })
+    .sort((a,b)=>(b.al?1:0)-(a.al?1:0) || (b.mm||0)-(a.mm||0));
+  const sel=rows.find(x=>x.s.id===rainSel) || rows.find(x=>x.al) || null;
+  if(sel) rainSel=sel.s.id;
+  const upd = RAIN ? new Date(RAIN.at).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '—';
+  let h=`<div class="rain-meta">סף התראה: ${RAIN_WARN} מ״מ ב-24 שעות (מעל ${RAIN_RED} – אדום) · עודכן ${upd} <button class="linkbtn" id="rnRefresh">רענן</button>${canEditS?' · <button class="linkbtn" id="rnEdit">עריכת גזרות</button>':''}</div>`;
+  if(!sec.length){ h+=`<div class="sec-empty">${canEditS?'עוד לא סומנו גזרות על המפה. לחץ "עריכת גזרות" וסמן את הגזרה של כל חטיבה.':'עוד לא סומנו גזרות לתחום שלך. פנה לקצין ההנדסה האוגדתי.'}</div>`; box.innerHTML=h; return; }
+  h+=`<div class="rain-list">${rows.map(x=>`<button class="rs ${x.s.id===rainSel?'on':''}" data-rsec="${esc(x.s.id)}"><span class="dot" style="background:${x.al?rainColor(x.al.mm):'#5b6b60'}"></span>
+      <span class="nm">${esc(briLabel(x.s.division,x.s.brigade))}</span><span class="mm" style="color:${x.mm!=null?rainColor(x.mm):'var(--muted)'}">${x.mm!=null?mmTxt(x.mm):'—'}</span>${x.al?'<span class="tag-al">התראה</span>':''}</button>`).join('')}</div>`;
+  if(sel){
+    const ir=infraRows(sel.s.division,sel.s.brigade), al=sel.al, past=RAINAL.filter(a=>a.sectorId===sel.s.id && a.ack).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,3);
+    h+=`<div class="rain-det">
+      <h4>${esc(briLabel(sel.s.division,sel.s.brigade))} · ${esc(sel.s.division)}</h4>
+      <div class="rain-nums"><span><b style="color:${sel.mm!=null?rainColor(sel.mm):'inherit'}">${sel.mm!=null?Math.round(sel.mm):'—'}</b>מ״מ בשיא 24 שעות</span><span><b>${sel.last!=null?Math.round(sel.last):'—'}</b>מ״מ ב-24 השעות האחרונות</span><span><b>${ir.key}</b>צירים ומכשולים</span></div>
+      ${al?`<div class="rain-al ${al.mm>=RAIN_RED?'red':''}">התראה פתוחה מ-${esc(fmtDT(al.createdAt))} · שיא הגשם ${esc(fmtDT(al.peakAt))}
+        ${(canFullOn(al)||(isBrig()&&inMyBrigade(al)))?`<div class="link-box" style="margin-top:8px"><input class="in" id="ackNote" placeholder="מה נבדק (לא חובה)"><button class="btn-primary sm" id="rnAck" data-al="${esc(al.id)}">סמן כנבדק</button></div>`:''}</div>`:''}
+      ${past.length?`<div class="hint" style="margin:6px 0">התראות קודמות: ${past.map(a=>`${fmtD(a.createdAt)} ${mmTxt(a.mm)} – נבדק ע״י ${esc(a.ackBy||'')}`).join(' · ')}</div>`:''}
+      <div class="ri-head">תשתיות בגזרה (${ir.list.length})</div><div class="ri-list">${ir.html}</div>
+    </div>`;
+  }
+  box.innerHTML=h;
+}
+$('#rainSide').addEventListener('click',async e=>{
+  const oi=e.target.closest('[data-openif]'); if(oi){ openIF(oi.dataset.openif); return; }
+  const s=e.target.closest('[data-rsec]'); if(s){ rainSel=s.dataset.rsec; drawRain(); renderRainSide(); return; }
+  if(e.target.id==='rnRefresh'){ e.target.textContent='מרענן…'; await checkRain(true); drawRain(); renderRainSide(); return; }
+  if(e.target.id==='rnEdit'){ rainMode='edit'; editKey={ d:isDiv()?current.division:(DF.div||''), b:'' }; draft=[]; drawRain(); renderRainSide(); return; }
+  if(e.target.id==='rnAck'){ const id=e.target.dataset.al;
+    try{ await FB.updateDoc(FB.doc(FB.db,'rainAlerts',id),{ ack:true, ackBy:current.name, ackAt:new Date().toISOString(), ackNote:norm($('#ackNote')?.value||'') }); toast('ההתראה סומנה כנבדקה'); }
+    catch(err){ toast('לא נשמר. '+authMsg(err)); } return; }
+  if(e.target.id==='sgUndo'){ draft.pop(); drawRain(); renderRainSide(); return; }
+  if(e.target.id==='sgClear'){ draft=[]; drawRain(); renderRainSide(); return; }
+  if(e.target.id==='sgBack'){ rainMode='view'; draft=[]; drawRain(true); renderRainSide(); return; }
+  if(e.target.id==='sgSave'){
+    if(!editKey.d||!editKey.b){ $('#sgErr').textContent='בחר אוגדה וחטיבה'; return; }
+    if(draft.length<3){ $('#sgErr').textContent='סמן לפחות 3 נקודות על המפה'; return; }
+    const ex=sectorOf(editKey.d,editKey.b), data={ division:editKey.d, brigade:editKey.b, pts:draft, updatedAt:new Date().toISOString(), updatedBy:current.name };
+    try{ if(ex) await FB.setDoc(FB.doc(FB.db,'sectors',ex.id),data); else await FB.setDoc(FB.doc(FB.collection(FB.db,'sectors')),data);
+      toast(`הגזרה של ${editKey.b} נשמרה`); draft=[]; editKey.b=''; renderRainSide(); setTimeout(()=>checkRain(false),300); }
+    catch(err){ $('#sgErr').textContent='השמירה נכשלה. '+authMsg(err); }
+    return;
+  }
+  if(e.target.id==='sgDel'){ const ex=sectorOf(editKey.d,editKey.b); if(!ex) return;
+    if(await confirmDlg(`למחוק את הגזרה של ${editKey.b}?`)){ try{ await FB.deleteDoc(FB.doc(FB.db,'sectors',ex.id)); toast('נמחקה'); draft=[]; renderRainSide(); }catch(err){ toast('המחיקה נכשלה. '+authMsg(err)); } } }
+});
+$('#rainSide').addEventListener('change',e=>{
+  if(e.target.id==='sgDiv'){ editKey={ d:e.target.value, b:'' }; draft=[]; drawRain(); renderRainSide(); }
+  if(e.target.id==='sgBri'){ editKey.b=e.target.value; const ex=sectorOf(editKey.d,editKey.b); draft=ex?ex.pts.map(p=>({...p})):[]; drawRain();
+    if(ex) rmap.fitBounds(ex.pts.map(p=>[p.lat,p.lng]),{ padding:[30,30], maxZoom:12 }); renderRainSide(); }
+});
+$('#rainClose').addEventListener('click',closeRain);
+$('#rainBack').addEventListener('click',e=>{ if(e.target.id==='rainBack') closeRain(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('#rainBack').classList.contains('show')) closeRain(); });
+
 /* ================= Login ================= */
 digitsOnly($('#lgPn')); digitsOnly($('#suPn'));
 ['#lgPn','#lgPw'].forEach(x=>$(x).addEventListener('input',()=>$('#lgErr').textContent=''));
@@ -1874,7 +2147,7 @@ function enterApp(){
 }
 $('#btnLogout').addEventListener('click',async ()=>{
   stopData(); current=null; SEEN=new Set();
-  $('#newAlert').hidden=true; $('#bellCount').hidden=true; closeFC(); closeIF(); closePL(); closeIRV();
+  $('#newAlert').hidden=true; $('#bellCount').hidden=true; closeFC(); closeIF(); closePL(); closeIRV(); closeRain();
   try{ await FB.signOut(FB.auth); }catch(e){}
   showScreen('login'); setTimeout(()=>$('#lgPn').focus(),50);
 });
@@ -1999,6 +2272,7 @@ $('#embFile').addEventListener('change',async()=>{
     toast('הסמל עודכן'); }
   catch(ex){ toast(ex?.message==='img'?'לא ניתן לקרוא את התמונה':'לא נשמר. '+authMsg(ex)); }
 });
+$('#openSectors').addEventListener('click',()=>{ openRain(); setTimeout(()=>$('#rnEdit')?.click(),400); });
 $('#loadDefault').addEventListener('click',async()=>{
   if(!await confirmDlg('להוסיף את מבנה ברירת המחדל (אוגדות 91, 36, 210 והחטיבות שלהן)? יחידות קיימות לא יימחקו.','הוסף')) return;
   try{

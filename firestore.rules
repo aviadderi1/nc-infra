@@ -122,6 +122,26 @@ service cloud.firestore {
       allow delete: if canActFull(resource.data);
     }
 
+    // ---- גזרות חטיבה למעקב משקעים (פוליגונים) – רק משתמשים מורשים ----
+    match /sectors/{id} {
+      allow read: if canView(resource.data);
+      allow create: if canActFull(request.resource.data) && request.resource.data.pts is list && request.resource.data.pts.size() <= 300;
+      allow update: if canActFull(resource.data) && canActFull(request.resource.data) && request.resource.data.pts.size() <= 300;
+      allow delete: if canActFull(resource.data);
+    }
+
+    // ---- התראות משקעים: נוצרות אוטומטית מהדשבורד, נסגרות ב"סמן כנבדק" ----
+    match /rainAlerts/{id} {
+      allow read: if canView(resource.data);
+      allow create: if canView(request.resource.data) && request.resource.data.ack == false;
+      allow update: if (canView(resource.data) && resource.data.ack == false
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mm', 'last24', 'peakAt', 'updatedAt']))
+        || ((canActFull(resource.data) || (isBrig() && inMyBrigade(resource.data)))
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ack', 'ackBy', 'ackAt', 'ackNote'])
+            && request.resource.data.ack == true);
+      allow delete: if isSys();
+    }
+
     // ---- מבנה אוגדות וחטיבות + סמלים (נדרש גם לטפסים הפתוחים) ----
     match /structure/{divId} {
       allow read: if true;
